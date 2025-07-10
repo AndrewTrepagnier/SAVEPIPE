@@ -221,27 +221,36 @@ class SAVEPIPE:
 
     def percent_RL(self, actual_thickness):
         """
-        Calculate percentage of retirement limit remaining
-        RL = actual thickness - minimum required thickness
+        Calculate percentage of retirement limit (Table 5) remaining
+        RL = actual thickness / retirement limit from Table 5
         """
-        tmin = self.calculate_tmin_pressure()
-        RL = actual_thickness - tmin
-        percent_remaining = (RL / actual_thickness) * 100
+        RL = self.table5_1_RL.get(self.nps)
+        if RL is None:
+            raise ValueError(f"No retirement limit available for NPS {self.nps}")
+        
+        percent_remaining = (actual_thickness / RL) * 100
         return percent_remaining
 
-    def compare_thickness(self, actual_thickness):
+    def check_RL_status(self, actual_thickness):
         """
-        Compare actual vs calculated minimum thickness
-        Returns comparison metrics
+        Check if pipe meets retirement limit requirements
+        Returns status and percentage remaining
         """
-        tmin = self.calculate_tmin_pressure()
-        excess = actual_thickness - tmin
-        percent_excess = (excess / actual_thickness) * 100
+        RL = self.table5_1_RL.get(self.nps)
+        if RL is None:
+            return {"status": "No RL data", "percent_remaining": None}
         
+        percent_remaining = (actual_thickness / RL) * 100
+        
+        if actual_thickness >= RL:
+            status = "Above RL"
+        else:
+            status = "Below RL - Consider Retirement"
+            
         return {
-            'actual_thickness': actual_thickness,
-            'calculated_tmin': tmin,
-            'excess_thickness': excess,
-            'percent_excess': percent_excess,
-            'percent_RL_remaining': self.percent_RL(actual_thickness)
+            "status": status,
+            "retirement_limit": RL,
+            "actual_thickness": actual_thickness,
+            "percent_remaining": percent_remaining
         }
+    
