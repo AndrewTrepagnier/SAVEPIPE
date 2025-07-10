@@ -253,4 +253,40 @@ class SAVEPIPE:
             "actual_thickness": actual_thickness,
             "percent_remaining": percent_remaining
         }
+
+    def compare_thickness(self, actual_thickness, temp_f=1000, joint_type='Seamless'):
+        """
+        Comprehensive thickness analysis comparing actual vs calculated t-min and RL
+        Returns comparison metrics for both pressure design and retirement limit
+        """
+        # Calculate pressure design requirements
+        tmin = self.calculate_tmin_pressure(temp_f, joint_type)
+        tmin_excess = actual_thickness - tmin
+        tmin_percent_excess = (tmin_excess / actual_thickness) * 100
+        
+        # Check retirement limit
+        rl_status = self.check_RL_status(actual_thickness)
+        
+        return {
+            'actual_thickness': actual_thickness,
+            'calculated_tmin': tmin,
+            'tmin_excess': tmin_excess,
+            'tmin_percent_excess': tmin_percent_excess,
+            'rl_status': rl_status['status'],
+            'retirement_limit': rl_status['retirement_limit'],
+            'rl_percent_remaining': rl_status['percent_remaining'],
+            'pressure_design_adequate': tmin_excess > 0,
+            'rl_adequate': actual_thickness >= rl_status['retirement_limit'] if rl_status['retirement_limit'] else None
+        }
     
+
+#USAGE EXAMPLE
+
+pipe = SAVEPIPE("40", "2", 500.0, "straight")
+
+# Comprehensive analysis
+results = pipe.compare_thickness(actual_thickness=0.060)
+
+print(f"Pressure Design: {results['pressure_design_adequate']}")
+print(f"RL Status: {results['rl_status']}")
+print(f"RL % Remaining: {results['rl_percent_remaining']:.1f}%")
