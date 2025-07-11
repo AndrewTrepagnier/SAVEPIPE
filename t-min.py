@@ -1,6 +1,7 @@
 import numpy as np
 from dataclasses import dataclass
 from typing import Literal
+import json
 
 @dataclass
 class SAVEPIPE:
@@ -16,6 +17,16 @@ class SAVEPIPE:
     
     # Valid schedules for reference
     VALID_SCHEDULES = ["10", "40", "80", "120", "160"]
+
+    #########################
+
+    # with open('newjsonfile', 'r') as file:
+    #     data = json.load(file)
+
+    # with open('newjsonfile', 'r') as file:
+    #     data = json.load(file)
+
+    ###########################
 
     trueOD_10 = {
             '3/4' : 1.050,
@@ -142,30 +153,76 @@ class SAVEPIPE:
         'Electric Resistance Welded': 0.85
     }
 
+    ###########################################################
     # See table of y coefficients in Table 104.1.2-1 ASME B31.1
-    table5_1_RL = {
-        '3/4': 0.083,
-        '1': 0.083,
-        '1-1/4': 0.083,
-        '1-1/2': 0.083,
-        '2': 0.083,
-        '2-1/2': None,
-        '3': 0.134,
-        '3-1/2': 0.134,
-        '4': 0.134,
-        '5': 0.134,
-        '6': 0.134,
-        '8': 0.134,
-        '10': 0.134,
-        '12': 0.134,
-        '14': 0.134,
-        '16': 0.134,
-        '18': 0.134,
-        '20': 0.148,
-        '22': 0.148,
-        '24': 0.165
+
+    ferritic_steels_y = {
+        900: 0.4,
+        950: 0.5,
+        1000: 0.7,
+        1050: 0.7,
+        1100: 0.7,
+        1150: 0.7,
+        1200: 0.7,
+        1250: 0.7
     }
 
+    austenitic_steels_y = {
+        900: 0.4,
+        950: 0.4,
+        1000: 0.4,
+        1050: 0.4,
+        1100: 0.5,
+        1150: 0.7,
+        1200: 0.7,
+        1250: 0.7
+    }
+
+    nickel_alloy_N06690_y = {
+        900: 0.4,
+        950: 0.4,
+        1000: 0.4,
+        1050: 0.4,
+        1100: 0.5,
+        1150: 0.7,
+        1200: 0.7,
+        1250: None  # Not applicable ("...")
+    }
+
+    nickel_alloys_N06617_N08800_N08810_N08825_y = {
+        900: 0.4,
+        950: 0.4,
+        1000: 0.4,
+        1050: 0.4,
+        1100: 0.4,
+        1150: 0.4,
+        1200: 0.5,
+        1250: 0.7
+    }
+
+    cast_iron_y = {
+        900: 0.0,
+        950: None,
+        1000: None,
+        1050: None,
+        1100: None,
+        1150: None,
+        1200: None,
+        1250: None
+    }
+
+    other_metals_y = {
+        900: 0.4,
+        950: 0.4,
+        1000: 0.4,
+        1050: 0.4,
+        1100: 0.4,
+        1150: 0.4,
+        1200: 0.4,
+        1250: 0.4
+    }
+
+    ##########################################################
     def get_OD(self):
         """Get outside diameter based on schedule and NPS"""
         if self.schedule == "10":
@@ -183,9 +240,10 @@ class SAVEPIPE:
 
     def get_Y_coefficient(self):
         """Get Y coefficient from ASME B31.1 Table 104.1.2-1"""
-        return self.table5_1_RL.get(self.nps)
+        return self.ferritic_steels_y[900] # For most process CS pipes, the y coefficient for 900°F (482°C) and below is used, which is y = 0.4 for ferritic steels (the most common type of CS pipe)
 
-    def calculate_tmin_pressure(self, temp_f=1000, joint_type='Seamless'):
+
+    def calculate_tmin_pressure(self, temp_f=None, joint_type='Seamless'):
         """
         Calculate minimum wall thickness for pressure design
         Based on ASME B31.1 Para. 304.1.2a Eq. 3a
@@ -199,7 +257,7 @@ class SAVEPIPE:
         
         # Get WSRF based on temperature
         temp_str = str(temp_f)
-        W = self.WSRF.get(temp_str, 1.0)  # Default to 1.0 if temp not found
+        W = self.WSRF.get(temp_str, 1.0)  # Default to 1.0 if temp not found, most process piping operate at temperatures below 950F
         
         Y = self.get_Y_coefficient()
         if Y is None:
@@ -219,74 +277,128 @@ class SAVEPIPE:
         # Would include bending stress, torsion, etc.
         return 0.0
 
-    def percent_RL(self, actual_thickness):
-        """
-        Calculate percentage of retirement limit (Table 5) remaining
-        RL = actual thickness / retirement limit from Table 5
-        """
-        RL = self.table5_1_RL.get(self.nps)
-        if RL is None:
-            raise ValueError(f"No retirement limit available for NPS {self.nps}")
-        
-        percent_remaining = (actual_thickness / RL) * 100
-        return percent_remaining
+    # Old functions commented out for clarity and reference
+    # def percent_RL(self, actual_thickness):
+    #     """
+    #     Calculate percentage of retirement limit (Table 5) remaining
+    #     RL = actual thickness / retirement limit from Table 5
+    #     """
+    #     RL = self.table5_1_RL.get(self.nps)
+    #     if RL is None:
+    #         raise ValueError(f"No retirement limit available for NPS {self.nps}")
+    #     percent_remaining = (actual_thickness / RL) * 100
+    #     return percent_remaining
 
-    def check_RL_status(self, actual_thickness):
+    # def check_RL_status(self, actual_thickness):
+    #     """
+    #     Check if pipe meets retirement limit requirements
+    #     Returns status and percentage remaining
+    #     """
+    #     RL = self.table5_1_RL.get(self.nps)
+    #     if RL is None:
+    #         return {"status": "No RL data", "percent_remaining": None}
+    #     percent_remaining = (actual_thickness / RL) * 100
+    #     if actual_thickness >= RL:
+    #         status = "Above RL"
+    #     else:
+    #         status = "Below RL - Consider Retirement"
+    #     return {
+    #         "status": status,
+    #         "retirement_limit": RL,
+    #         "actual_thickness": actual_thickness,
+    #         "percent_remaining": percent_remaining
+    #     }
+
+    # def compare_thickness(self, actual_thickness, temp_f=1000, joint_type='Seamless'):
+    #     """
+    #     Comprehensive thickness analysis comparing actual vs calculated t-min and RL
+    #     Returns comparison metrics for both pressure design and retirement limit
+    #     """
+    #     # Calculate pressure design requirements
+    #     tmin = self.calculate_tmin_pressure(temp_f, joint_type)
+    #     tmin_excess = actual_thickness - tmin
+    #     tmin_percent_excess = (tmin_excess / actual_thickness) * 100
+    #     # Check retirement limit
+    #     rl_status = self.check_RL_status(actual_thickness)
+    #     return {
+    #         'actual_thickness': actual_thickness,
+    #         'calculated_tmin': tmin,
+    #         'tmin_excess': tmin_excess,
+    #         'tmin_percent_excess': tmin_percent_excess,
+    #         'rl_status': rl_status['status'],
+    #         'retirement_limit': rl_status['retirement_limit'],
+    #         'rl_percent_remaining': rl_status['percent_remaining'],
+    #         'pressure_design_adequate': tmin_excess > 0,
+    #         'rl_adequate': actual_thickness >= rl_status['retirement_limit'] if rl_status['retirement_limit'] else None
+    #     }
+
+    def analyze_pipe_thickness(self, actual_thickness, temp_f=1000, joint_type='Seamless', proposed_retirement_limit=None):
         """
-        Check if pipe meets retirement limit requirements
-        Returns status and percentage remaining
+        Analyze and compare all relevant thicknesses: pressure, structural, Table 5, and proposed retirement.
+        Returns a dict with all relevant results and limiting factor.
         """
-        RL = self.table5_1_RL.get(self.nps)
-        if RL is None:
-            return {"status": "No RL data", "percent_remaining": None}
-        
-        percent_remaining = (actual_thickness / RL) * 100
-        
-        if actual_thickness >= RL:
-            status = "Above RL"
+        # 1. Calculate pressure tmin
+        tmin_pressure = self.calculate_tmin_pressure(temp_f, joint_type)
+        # 2. Calculate structural tmin (placeholder)
+        tmin_structural = self.calculate_tmin_structural()
+        # 3. Get Table 5 retirement limit from JSON
+        import json
+        with open('table5.JSON', 'r') as f:
+            table5 = json.load(f)
+        table5_retirement_limit = table5.get(self.nps)
+        # 4. Proposed retirement limit (user input or logic)
+        if proposed_retirement_limit is None:
+            proposed_retirement_limit = table5_retirement_limit  # fallback
+        # 5. Find limiting thickness
+        limits = {
+            "pressure": tmin_pressure,
+            "structural": tmin_structural,
+            "table5": table5_retirement_limit,
+            "proposed": proposed_retirement_limit
+        }
+        limiting_type = min(limits, key=lambda k: limits[k] if limits[k] is not None else float('inf'))
+        limiting_thickness = limits[limiting_type]
+        # 6. How much below Table 5?
+        amount_below_table5 = (table5_retirement_limit - actual_thickness) if (table5_retirement_limit and actual_thickness < table5_retirement_limit) else 0
+        # 7. Status
+        if actual_thickness < table5_retirement_limit:
+            status = "Below Table 5"
         else:
-            status = "Below RL - Consider Retirement"
-            
+            status = "OK"
         return {
-            "status": status,
-            "retirement_limit": RL,
-            "actual_thickness": actual_thickness,
-            "percent_remaining": percent_remaining
+            "tmin_pressure": tmin_pressure,
+            "tmin_structural": tmin_structural,
+            "table5_retirement_limit": table5_retirement_limit,
+            "proposed_retirement_limit": proposed_retirement_limit,
+            "limiting_thickness": limiting_thickness,
+            "limiting_type": limiting_type,
+            "amount_below_table5": amount_below_table5,
+            "status": status
         }
 
-    def compare_thickness(self, actual_thickness, temp_f=1000, joint_type='Seamless'):
-        """
-        Comprehensive thickness analysis comparing actual vs calculated t-min and RL
-        Returns comparison metrics for both pressure design and retirement limit
-        """
-        # Calculate pressure design requirements
-        tmin = self.calculate_tmin_pressure(temp_f, joint_type)
-        tmin_excess = actual_thickness - tmin
-        tmin_percent_excess = (tmin_excess / actual_thickness) * 100
-        
-        # Check retirement limit
-        rl_status = self.check_RL_status(actual_thickness)
-        
-        return {
-            'actual_thickness': actual_thickness,
-            'calculated_tmin': tmin,
-            'tmin_excess': tmin_excess,
-            'tmin_percent_excess': tmin_percent_excess,
-            'rl_status': rl_status['status'],
-            'retirement_limit': rl_status['retirement_limit'],
-            'rl_percent_remaining': rl_status['percent_remaining'],
-            'pressure_design_adequate': tmin_excess > 0,
-            'rl_adequate': actual_thickness >= rl_status['retirement_limit'] if rl_status['retirement_limit'] else None
-        }
-    
 
 #USAGE EXAMPLE
 
 pipe = SAVEPIPE("40", "2", 500.0, "straight")
 
 # Comprehensive analysis
-results = pipe.compare_thickness(actual_thickness=0.060)
+results = pipe.analyze_pipe_thickness(actual_thickness=0.060)
 
-print(f"Pressure Design: {results['pressure_design_adequate']}")
-print(f"RL Status: {results['rl_status']}")
-print(f"RL % Remaining: {results['rl_percent_remaining']:.1f}%")
+# print(f"Pressure Design: {results['pressure_design_adequate']}")
+# print(f"RL Status: {results['rl_status']}")
+# print(f"RL % Remaining: {results['rl_percent_remaining']:.1f}%")
+
+
+
+
+
+
+# TODO: Implement logic to propose new retirement limits
+# The new retirement limit should be based on:
+#   - Corrosion rates (as determined by inspection and process teams)
+#   - Remaining service life requirements
+#   - Regulatory or company standards
+# This may require:
+#   - Accepting corrosion rate as an input (e.g., mils per year)
+#   - Calculating remaining life based on current thickness, corrosion rate, and required future service duration
+#   - Setting the new retirement limit to ensure safe operation until next planned inspection or end of service life
