@@ -1,8 +1,217 @@
-# SAVEPIPE
-An industry-proven tmin calculation engine for determining retirement limit on pipes
+# SAVEPIPE - Pipe Thickness Analysis & Retirement Planning
+
+## Introduction
+
+Many oil and gas companies are faced with maintaining 10,000+ miles of 100+ year old piping networks supporting multi-million dollar/year processing operations. There is rarely a simple solution to immediately shutdown a process pipe - as these shutdowns more often than not impact other units and cost companies millions in time and resources. 
+
+In mechanical integrity engineering, we are frequently asked the hard question - do we have to shutdown the pipe immediately, or do we have time? Pipe retirement requires rigorous analysis. You must find the perfect balance - such that one isn't squandering company time/resources but also holding personnel safety paramount. 
+
+**This is more than a python package, it is a comprehensive engineering decision support system for critical infrastructure safety and operational continuity.**
 
 ## Cross-section of Pipe Wall Thinning Over Time
-![Cross-section of Pipe Wall Thinning Over Time](https://github.com/user-attachments/assets/3808cbdb-c252-4678-aa04-b75a6ad5b2db)
+![Cross-section of Pipe Wall Thinning Over Time](https://github.com/user-attachments/assets/
+3808cbdb-c252-4678-aa04-b75a6ad5b2db)
+
+## Overview
+
+SAVEPIPE is a sophisticated pipe thickness analysis tool designed for mechanical integrity engineers, reliability specialists, and operations teams in the oil and gas industry. It provides automated analysis of pipe wall thickness against multiple design criteria and generates professional reports with actionable recommendations.
+
+## Key Features
+
+### 🔍 **Comprehensive Analysis**
+- **Pressure Design Analysis**: ASME B31.1 pressure design calculations
+- **Structural Analysis**: API 574 structural minimum thickness requirements
+- **Retirement Limit Assessment**: Multiple retirement limit criteria evaluation
+- **Corrosion Life Prediction**: Remaining service life calculations based on corrosion rates
+
+### 📊 **Professional Reporting**
+- **Detailed Text Reports**: Comprehensive analysis with recommendations
+- **Summary Reports**: Quick overview for management review
+- **Visualizations**: Number line plots and comparison charts
+- **Automatic File Organization**: Date-stamped files in organized Reports folder
+
+### 🛡️ **Safety & Compliance**
+- **Multiple Standards**: ASME B31.1, API 574, and custom Table 5 retirement limits
+- **Risk Assessment**: Automatic identification of critical conditions
+- **Recommendations**: Actionable guidance based on analysis results
+- **Documentation**: Professional reports for regulatory compliance
+
+### ⚡ **Engineering Decision Support**
+- **Limiting Factor Identification**: Determines controlling design criteria
+- **Adequacy Assessment**: Clear pass/fail status for each criterion
+- **Life Span Prediction**: Corrosion-based remaining life estimates
+- **Immediate Action Alerts**: Critical condition notifications
+
+## Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/AndrewTrepagnier/SAVEPIPE.git
+cd SAVEPIPE
+
+# Install dependencies
+pip install -r requirements.txt
+```
+
+## Quick Start
+
+```python
+from savepipe.core import SAVEPIPE
+
+# Create a pipe instance
+pipe = SAVEPIPE(
+    schedule="40",
+    nps="2", 
+    pressure=500.0,
+    pressure_class=600,
+    metallurgy="CS A106 GR B",
+    corrosion_rate=10.0  # mpy (optional)
+)
+
+# Perform comprehensive analysis
+results = pipe.analyze_pipe_thickness(actual_thickness=0.060)
+
+# Generate full report with visualizations
+report_files = pipe.generate_full_report(actual_thickness=0.060)
+```
+
+## Usage Examples
+
+### Basic Analysis
+```python
+# Simple thickness check
+pipe = SAVEPIPE("40", "2", 500.0, 600, "CS A106 GR B")
+results = pipe.analyze_pipe_thickness(actual_thickness=0.060)
+
+print(f"Limiting Factor: {results['limiting_type']}")
+print(f"Status: {'ADEQUATE' if results['limiting_thickness'] <= 0.060 else 'INADEQUATE'}")
+```
+
+### With Corrosion Analysis
+```python
+# Include corrosion rate for life prediction
+pipe = SAVEPIPE(
+    schedule="40", nps="2", pressure=500.0, 
+    pressure_class=600, metallurgy="CS A106 GR B",
+    corrosion_rate=15.0  # 15 mpy corrosion rate
+)
+
+results = pipe.analyze_pipe_thickness(actual_thickness=0.080)
+print(f"Remaining Life: {results.get('life_span', 'N/A')} years")
+```
+
+### Full Report Generation
+```python
+# Generate comprehensive report with visualizations
+report_files = pipe.generate_full_report(actual_thickness=0.060)
+
+# Files automatically saved to Reports/ folder with timestamps
+print("Generated files:")
+for file_type, filepath in report_files.items():
+    if file_type != "analysis_results":
+        print(f"  {file_type}: {filepath}")
+```
+
+## Analysis Criteria
+
+### Pressure Design (ASME B31.1)
+- Calculates minimum wall thickness for pressure containment
+- Considers temperature effects via WSRF (Weld Strength Reduction Factor)
+- Uses Y-coefficient for high-temperature applications
+
+### Structural Requirements (API 574)
+- Evaluates minimum thickness for structural integrity
+- Considers pipe deflection and weight loading
+- Based on API 574 Table D.2 requirements
+
+### Retirement Limits
+- **API 574 Retirement Limit**: Code-mandated minimum thickness
+- **Table 5 Retirement Limit**: Company-specific maintenance limits
+- **Custom Limits**: User-defined retirement criteria
+
+### Corrosion Analysis
+- **Life Span Prediction**: Based on corrosion rate and thickness excess
+- **Corrosion Allowance**: Thickness above retirement limits
+- **Monitoring Recommendations**: Inspection frequency guidance
+
+## Output Files
+
+When you run a full analysis, SAVEPIPE automatically creates a `Reports/` folder and generates:
+
+### 📄 **Text Reports**
+- **Full Report**: Comprehensive analysis with all details and recommendations
+- **Summary Report**: Executive summary for management review
+
+### 📊 **Visualizations**
+- **Number Line Plot**: Shows all thickness values on a scale for easy comparison
+- **Comparison Chart**: Bar chart highlighting the limiting factor
+
+### 📁 **File Naming**
+All files are automatically named with timestamps:
+```
+Reports/
+├── 20250712_181928_SAVEPIPE_report_SAVEPIPE_20250712_181928.txt
+├── 20250712_181928_SAVEPIPE_summary_20250712_181928.txt
+├── 20250712_181928_thickness_analysis_number_line.png
+└── 20250712_181928_thickness_comparison_chart.png
+```
+
+## Supported Pipe Specifications
+
+### Schedules
+- 10, 40, 80, 120, 160
+
+### Nominal Pipe Sizes (NPS)
+- 0.5" to 24" (varies by schedule)
+
+### Pressure Classes
+- 150, 300, 600, 900, 1500, 2500
+
+### Metallurgies
+- CS A106 GR B (Carbon Steel)
+- SS 316/316S (Stainless Steel) - Coming Soon
+- SS 304 (Stainless Steel) - Coming Soon
+- Inconel 625 (Nickel Alloy) - Coming Soon
+
+## Testing
+
+Run the comprehensive test suite:
+
+```bash
+python -m tests.test_core
+```
+
+The test suite includes:
+- Basic analysis functionality
+- Report generation
+- Multiple pipe scenarios
+- Corrosion rate analysis
+- Edge case handling
+
+## Contributing
+
+This project is designed for the mechanical integrity engineering community. Contributions are welcome, especially for:
+
+- Additional metallurgy support
+- New retirement limit standards
+- Enhanced visualization features
+- Additional analysis criteria
+
+## License
+
+[Add your license information here]
+
+## Disclaimer
+
+SAVEPIPE is a decision support tool designed to assist qualified engineers in making informed decisions about pipe integrity. It should be used in conjunction with professional engineering judgment and should not be the sole basis for critical safety decisions. Always consult with qualified personnel and follow applicable codes and standards.
+
+## Contact
+
+For questions, suggestions, or contributions, please contact [your contact information].
+
+---
+
+**SAVEPIPE** - Making critical infrastructure decisions safer and more informed.
 
 
 
