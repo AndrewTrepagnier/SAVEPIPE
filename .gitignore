@@ -1,0 +1,6 @@
+# Ignore Python cache and environment
+__pycache__/
+*.pyc
+venv/
+# Ignoring Propreitary Retirement Table
+table5.JSON
