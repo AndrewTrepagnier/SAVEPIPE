@@ -6,8 +6,10 @@ from .asmetables.api_574 import API574_CS_400F
 
 import numpy as np
 from dataclasses import dataclass
-from typing import Literal, Optional
+from typing import Literal, Optional, Dict
 import json
+import matplotlib.pyplot as plt
+from datetime import datetime
 
 @dataclass
 class SAVEPIPE:
@@ -267,6 +269,42 @@ class SAVEPIPE:
             #"status": status
         }
 
+    def generate_full_report(self, actual_thickness: float, temp_f=1000, joint_type='Seamless') -> Dict[str, str]:
+        """
+        Generate a complete analysis with text report and visualizations
+        
+        Args:
+            actual_thickness: The actual measured thickness
+            temp_f: Temperature in Fahrenheit
+            joint_type: Joint type for calculations
+            
+        Returns:
+            Dict containing paths to generated files
+        """
+        from .report_generator import ReportGenerator
+        from .visualization import ThicknessVisualizer
+        
+        # Perform analysis
+        analysis_results = self.analyze_pipe_thickness(actual_thickness, temp_f, joint_type)
+        
+        # Generate reports
+        report_gen = ReportGenerator()
+        full_report_path = report_gen.generate_report(self, analysis_results, actual_thickness)
+        summary_report_path = report_gen.generate_summary_report(self, analysis_results, actual_thickness)
+        
+        # Generate visualizations
+        visualizer = ThicknessVisualizer()
+        number_line_path = visualizer.create_thickness_number_line(analysis_results, actual_thickness)
+        comparison_chart_path = visualizer.create_comparison_chart(analysis_results, actual_thickness)
+        
+        return {
+            "full_report": full_report_path,
+            "summary_report": summary_report_path,
+            "number_line_plot": number_line_path,
+            "comparison_chart": comparison_chart_path,
+            "analysis_results": analysis_results
+        }
+
 
 # TODO: Implement logic to propose new retirement limits
 # The new retirement limit should be based on:
@@ -279,12 +317,3 @@ class SAVEPIPE:
 #   - Setting the new retirement limit to ensure safe operation until next planned inspection or end of service life
 #   - Add other metallurgy and temps to structural tmin py dictionaries
 #   - Add other metallurgy yield strengths to py dictionaries under S_
-
-if __name__ == "__main__":
-    # USAGE EXAMPLE
-    pipe = SAVEPIPE(schedule="40", nps="2", pressure=500.0, pressure_class=600, metallurgy="CS A106 GR B")
-    
-    # Comprehensive analysis
-    results = pipe.analyze_pipe_thickness(actual_thickness=0.060)
-    print("Analysis Results:")
-    print(results)

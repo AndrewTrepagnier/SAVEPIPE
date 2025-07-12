@@ -1,0 +1,277 @@
+from typing import Dict, Any, Optional
+from datetime import datetime
+import os
+
+class ReportGenerator:
+    """
+    Generates detailed text reports for pipe thickness analysis
+    """
+    
+    def __init__(self):
+        self.report_template = """
+SAVEPIPE - PIPE THICKNESS ANALYSIS REPORT
+=========================================
+
+Report Generated: {timestamp}
+Analysis ID: {analysis_id}
+
+PIPE SPECIFICATIONS
+-------------------
+Nominal Pipe Size (NPS): {nps}
+Schedule: {schedule}
+Pressure Class: {pressure_class}
+Metallurgy: {metallurgy}
+Design Pressure: {pressure} psi
+Pipe Configuration: {pipe_config}
+Corrosion Rate: {corrosion_rate} mpy
+
+MEASURED THICKNESS
+------------------
+Actual Thickness: {actual_thickness:.4f} inches
+
+DESIGN REQUIREMENTS
+-------------------
+Pressure Design Minimum: {tmin_pressure:.4f} inches
+Structural Minimum (API 574): {tmin_structural:.4f} inches
+Limiting Thickness: {limiting_thickness:.4f} inches
+Limiting Factor: {limiting_type}
+
+RETIREMENT LIMITS
+-----------------
+Table 5 Retirement Limit: {table5_RL:.4f} inches
+API 574 Retirement Limit: {api574_RL:.4f} inches
+
+THICKNESS ANALYSIS
+------------------
+Pressure Design Adequacy: {pressure_adequate}
+Structural Adequacy: {structural_adequate}
+Table 5 Status: {table5_status}
+API 574 Status: {api574_status}
+
+CORROSION ALLOWANCE
+-------------------
+Above API 574 RL: {above_api574} inches
+Below Table 5 RL: {below_table5} inches
+Estimated Life Span: {life_span} years
+
+RECOMMENDATIONS
+---------------
+{recommendations}
+
+NOTES
+-----
+{notes}
+"""
+        # Create Reports directory if it doesn't exist
+        self.reports_dir = "Reports"
+        os.makedirs(self.reports_dir, exist_ok=True)
+    
+    def _get_filename_with_date(self, base_name: str, filename: Optional[str] = None) -> str:
+        """Generate filename with date prefix"""
+        if filename is None:
+            date_str = datetime.now().strftime('%Y%m%d_%H%M%S')
+            filename = f"{date_str}_{base_name}"
+        
+        return os.path.join(self.reports_dir, filename)
+    
+    def generate_report(self, pipe_instance, analysis_results: Dict[str, Any], 
+                       actual_thickness: float, filename: Optional[str] = None) -> str:
+        """
+        Generate a comprehensive text report
+        
+        Args:
+            pipe_instance: SAVEPIPE instance
+            analysis_results: Results from analyze_pipe_thickness method
+            actual_thickness: The actual measured thickness
+            filename: Optional filename to save the report (without extension)
+            
+        Returns:
+            str: Path to saved report file
+        """
+        
+        # Generate analysis ID
+        analysis_id = f"SAVEPIPE_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+        
+        # Determine adequacy status
+        pressure_adequate = "ADEQUATE" if actual_thickness >= analysis_results.get('tmin_pressure', 0) else "INADEQUATE"
+        structural_adequate = "ADEQUATE" if actual_thickness >= analysis_results.get('tmin_structural', 0) else "INADEQUATE"
+        
+        # Table 5 status
+        table5_RL = analysis_results.get('default_retirement_limit', 0)
+        if table5_RL and actual_thickness >= table5_RL:
+            table5_status = "ABOVE RETIREMENT LIMIT"
+        elif table5_RL:
+            table5_status = f"BELOW RETIREMENT LIMIT by {table5_RL - actual_thickness:.4f} inches"
+        else:
+            table5_status = "NO DATA AVAILABLE"
+        
+        # API 574 status
+        api574_RL = analysis_results.get('api574_RL', 0)
+        if api574_RL and actual_thickness >= api574_RL:
+            api574_status = "ABOVE RETIREMENT LIMIT"
+        elif api574_RL:
+            api574_status = f"BELOW RETIREMENT LIMIT by {api574_RL - actual_thickness:.4f} inches"
+        else:
+            api574_status = "NO DATA AVAILABLE"
+        
+        # Generate recommendations
+        recommendations = self._generate_recommendations(analysis_results, actual_thickness)
+        
+        # Generate notes
+        notes = self._generate_notes(pipe_instance, analysis_results)
+        
+        # Format the report
+        report_content = self.report_template.format(
+            timestamp=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            analysis_id=analysis_id,
+            nps=pipe_instance.nps,
+            schedule=pipe_instance.schedule,
+            pressure_class=pipe_instance.pressure_class,
+            metallurgy=pipe_instance.metallurgy,
+            pressure=pipe_instance.pressure,
+            pipe_config=pipe_instance.pipe_config,
+            corrosion_rate=pipe_instance.corrosion_rate if pipe_instance.corrosion_rate else "Not specified",
+            actual_thickness=actual_thickness,
+            tmin_pressure=analysis_results.get('tmin_pressure', 0),
+            tmin_structural=analysis_results.get('tmin_structural', 0),
+            limiting_thickness=analysis_results.get('limiting_thickness', 0),
+            limiting_type=analysis_results.get('limiting_type', 'Unknown'),
+            table5_RL=table5_RL,
+            api574_RL=api574_RL,
+            pressure_adequate=pressure_adequate,
+            structural_adequate=structural_adequate,
+            table5_status=table5_status,
+            api574_status=api574_status,
+            above_api574=analysis_results.get('above_api574RL', 'N/A'),
+            below_table5=analysis_results.get('below_defaultRL', 'N/A'),
+            life_span=analysis_results.get('life_span', 'N/A'),
+            recommendations=recommendations,
+            notes=notes
+        )
+        
+        # Save the report
+        if filename is None:
+            filename = f"SAVEPIPE_report_{analysis_id}"
+        
+        filepath = self._get_filename_with_date(f"{filename}.txt")
+        with open(filepath, 'w') as f:
+            f.write(report_content)
+        
+        return filepath
+    
+    def _generate_recommendations(self, analysis_results: Dict[str, Any], actual_thickness: float) -> str:
+        """Generate recommendations based on analysis results"""
+        recommendations = []
+        
+        # Check pressure design adequacy
+        tmin_pressure = analysis_results.get('tmin_pressure', 0)
+        if actual_thickness < tmin_pressure:
+            recommendations.append("• IMMEDIATE ACTION REQUIRED: Actual thickness is below pressure design minimum")
+            recommendations.append("• Consider pipe replacement or pressure reduction")
+        
+        # Check structural adequacy
+        tmin_structural = analysis_results.get('tmin_structural', 0)
+        if actual_thickness < tmin_structural:
+            recommendations.append("• IMMEDIATE ACTION REQUIRED: Actual thickness is below structural minimum")
+            recommendations.append("• Fit-for-service assessment recommended")
+        
+        # Check API 574 retirement limit
+        api574_RL = analysis_results.get('api574_RL', 0)
+        if api574_RL and actual_thickness < api574_RL:
+            recommendations.append("• RETIREMENT RECOMMENDED: Below API 574 retirement limit")
+            recommendations.append("• Immediate retirement or detailed engineering assessment required")
+        
+        # Check Table 5 retirement limit
+        table5_RL = analysis_results.get('default_retirement_limit', 0)
+        if table5_RL and actual_thickness < table5_RL:
+            recommendations.append("• MONITORING REQUIRED: Below Table 5 retirement limit")
+            recommendations.append("• Increase inspection frequency")
+        
+        # Check life span
+        life_span = analysis_results.get('life_span', None)
+        if life_span is not None and life_span < 5:
+            recommendations.append("• SHORT REMAINING LIFE: Less than 5 years estimated")
+            recommendations.append("• Plan for replacement or detailed corrosion assessment")
+        
+        # If no issues found
+        if not recommendations:
+            recommendations.append("• Pipe thickness is adequate for current service conditions")
+            recommendations.append("• Continue with normal inspection schedule")
+        
+        return "\n".join(recommendations)
+    
+    def _generate_notes(self, pipe_instance, analysis_results: Dict[str, Any]) -> str:
+        """Generate additional notes about the analysis"""
+        notes = []
+        
+        notes.append(f"• Analysis based on ASME B31.1 pressure design equations")
+        notes.append(f"• Structural requirements from API 574 Table D.2")
+        notes.append(f"• Y-coefficient used: {pipe_instance.get_Y_coefficient()}")
+        
+        if pipe_instance.corrosion_rate:
+            notes.append(f"• Corrosion rate considered: {pipe_instance.corrosion_rate} mpy")
+        else:
+            notes.append("• No corrosion rate specified - life span calculation not performed")
+        
+        limiting_type = analysis_results.get('limiting_type', 'Unknown')
+        notes.append(f"• Limiting factor for design: {limiting_type}")
+        
+        return "\n".join(notes)
+    
+    def generate_summary_report(self, pipe_instance, analysis_results: Dict[str, Any], 
+                              actual_thickness: float, filename: Optional[str] = None) -> str:
+        """
+        Generate a brief summary report
+        
+        Args:
+            pipe_instance: SAVEPIPE instance
+            analysis_results: Results from analyze_pipe_thickness method
+            actual_thickness: The actual measured thickness
+            filename: Optional filename to save the report (without extension)
+            
+        Returns:
+            str: Path to saved report file
+        """
+        
+        # Determine overall status
+        tmin_pressure = analysis_results.get('tmin_pressure', 0)
+        tmin_structural = analysis_results.get('tmin_structural', 0)
+        api574_RL = analysis_results.get('api574_RL', 0)
+        
+        if actual_thickness < min([tmin_pressure, tmin_structural, api574_RL]):
+            status = "CRITICAL - IMMEDIATE ACTION REQUIRED"
+        elif actual_thickness < api574_RL:
+            status = "RETIREMENT RECOMMENDED"
+        elif actual_thickness < max([tmin_pressure, tmin_structural]):
+            status = "MONITORING REQUIRED"
+        else:
+            status = "ADEQUATE"
+        
+        summary_content = f"""
+SAVEPIPE SUMMARY REPORT
+=======================
+
+Pipe: NPS {pipe_instance.nps}, Schedule {pipe_instance.schedule}, Class {pipe_instance.pressure_class}
+Metallurgy: {pipe_instance.metallurgy}
+Actual Thickness: {actual_thickness:.4f} inches
+
+OVERALL STATUS: {status}
+
+Key Values:
+- Pressure Design Min: {tmin_pressure:.4f} inches
+- Structural Min: {tmin_structural:.4f} inches  
+- API 574 RL: {api574_RL:.4f} inches
+- Limiting Factor: {analysis_results.get('limiting_type', 'Unknown')}
+
+Generated: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
+"""
+        
+        # Save the summary
+        if filename is None:
+            filename = f"SAVEPIPE_summary_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+        
+        filepath = self._get_filename_with_date(f"{filename}.txt")
+        with open(filepath, 'w') as f:
+            f.write(summary_content)
+        
+        return filepath 

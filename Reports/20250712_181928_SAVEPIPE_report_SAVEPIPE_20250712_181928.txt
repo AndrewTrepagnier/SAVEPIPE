@@ -1,0 +1,62 @@
+
+SAVEPIPE - PIPE THICKNESS ANALYSIS REPORT
+=========================================
+
+Report Generated: 2025-07-12 18:19:28
+Analysis ID: SAVEPIPE_20250712_181928
+
+PIPE SPECIFICATIONS
+-------------------
+Nominal Pipe Size (NPS): 2
+Schedule: 40
+Pressure Class: 600
+Metallurgy: CS A106 GR B
+Design Pressure: 500.0 psi
+Pipe Configuration: straight
+Corrosion Rate: Not specified mpy
+
+MEASURED THICKNESS
+------------------
+Actual Thickness: 0.0600 inches
+
+DESIGN REQUIREMENTS
+-------------------
+Pressure Design Minimum: 0.0252 inches
+Structural Minimum (API 574): 0.0800 inches
+Limiting Thickness: 0.0252 inches
+Limiting Factor: pressure
+
+RETIREMENT LIMITS
+-----------------
+Table 5 Retirement Limit: 0.0830 inches
+API 574 Retirement Limit: 0.0800 inches
+
+THICKNESS ANALYSIS
+------------------
+Pressure Design Adequacy: ADEQUATE
+Structural Adequacy: INADEQUATE
+Table 5 Status: BELOW RETIREMENT LIMIT by 0.0230 inches
+API 574 Status: BELOW RETIREMENT LIMIT by 0.0200 inches
+
+CORROSION ALLOWANCE
+-------------------
+Above API 574 RL: None inches
+Below Table 5 RL: 0.023000000000000007 inches
+Estimated Life Span: None years
+
+RECOMMENDATIONS
+---------------
+• IMMEDIATE ACTION REQUIRED: Actual thickness is below structural minimum
+• Fit-for-service assessment recommended
+• RETIREMENT RECOMMENDED: Below API 574 retirement limit
+• Immediate retirement or detailed engineering assessment required
+• MONITORING REQUIRED: Below Table 5 retirement limit
+• Increase inspection frequency
+
+NOTES
+-----
+• Analysis based on ASME B31.1 pressure design equations
+• Structural requirements from API 574 Table D.2
+• Y-coefficient used: 0.4
+• No corrosion rate specified - life span calculation not performed
+• Limiting factor for design: pressure
