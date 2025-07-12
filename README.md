@@ -1,12 +1,39 @@
-# SAVEPIPE - Pipe Thickness Analysis & Retirement Planning
-
+# SAVEPIPE 
+The Industry-proven tool for determining retirement limits of process piping.
 ## Introduction
 
-Many oil and gas companies are faced with maintaining 10,000+ miles of 100+ year old piping networks supporting multi-million dollar/year processing operations. There is rarely a simple solution to immediately shutdown a process pipe - as these shutdowns more often than not impact other units and cost companies millions in time and resources. 
+Many oil and gas companies are faced with maintaining 10,000+ miles of 100+ year old piping networks supporting multi-billion dollar/year processing operations. There is rarely a simple solution to immediately shutdown a process pipe - as these shutdowns more often than not impact other units and cost companies millions in time and resources. 
 
-In mechanical integrity engineering, we are frequently asked the hard question - do we have to shutdown the pipe immediately, or do we have time? Pipe retirement requires rigorous analysis. You must find the perfect balance - such that one isn't squandering company time/resources but also holding personnel safety paramount. 
+In mechanical integrity engineering, we are frequently asked the hard question - **do we have to shutdown the pipe immediately, or do we have time?** Pipe retirement requires rigorous analysis. You must find the perfect balance - such that one isn't squandering company time/resources but also holding personnel safety paramount. 
 
 **This is more than a python package, it is a comprehensive engineering decision support system for critical infrastructure safety and operational continuity.**
+
+## The Challenge
+
+Every day, mechanical integrity engineers face decisions that can cost millions of dollars or risk catastrophic failure. When a pipe shows signs of thinning, the clock starts ticking. You need answers fast:
+
+- **Can this pipe continue operating safely?**
+- **How much time do we have before retirement is mandatory?**
+- **What are the consequences of immediate shutdown vs. continued operation?**
+- **How do we balance operational continuity with personnel safety?**
+
+These aren't theoretical questions - they're real decisions that affect production, safety, and the bottom line. SAVEPIPE was built by engineers, for engineers, to provide the analytical rigor needed for these critical decisions.
+
+## Understanding Pipe Retirement Limits
+
+Imagine a pipe wall gradually thinning over a 10-year span, slowly approaching a critical red line - the **retirement limit**. This is the minimum acceptable wall thickness that ensures safe operation. When the actual thickness hits this line, the pipe must be retired or replaced immediately.
+
+### The Two Minimum Thickness Requirements
+
+Pipe design involves two distinct minimum thickness calculations. The **pressure design minimum** ensures the pipe can contain internal pressure safely using ASME B31.1 equations that consider design pressure, temperature effects, and material properties. The **structural minimum** ensures the pipe can support its own weight and external loads according to API 574 Table D.2 requirements, which becomes critical for long spans or heavy contents.
+
+The **limiting thickness** is whichever of these two values is more restrictive. SAVEPIPE automatically determines which factor controls your design and provides clear guidance on current status, remaining life, and required actions.
+
+### Corrosion Allowance and Remaining Life
+
+The difference between your actual thickness and the retirement limit is your **corrosion allowance** - essentially your safety margin. This allowance, combined with your known corrosion rate from inspection reports, determines how much time you have before retirement becomes mandatory. 
+
+This analytical approach transforms the complex retirement decision into a clear, data-driven process that balances operational needs with safety requirements.
 
 ## Cross-section of Pipe Wall Thinning Over Time
 ![Cross-section of Pipe Wall Thinning Over Time](https://github.com/user-attachments/assets/
