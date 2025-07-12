@@ -1,5 +1,7 @@
 # SAVEPIPE 
 The Industry-proven tool for determining retirement limits of process piping.
+
+
 ## Introduction
 
 Many oil and gas companies are faced with maintaining 10,000+ miles of 100+ year old piping networks supporting multi-billion dollar/year processing operations. There is rarely a simple solution to immediately shutdown a process pipe - as these shutdowns more often than not impact other units and cost companies millions in time and resources. 
@@ -9,6 +11,11 @@ In mechanical integrity engineering, we are frequently asked the hard question -
 **This is more than a python package, it is a comprehensive engineering decision support system for critical infrastructure safety and operational continuity.**
 
 ## The Challenge
+
+**Cross-section of Pipe Wall Thinning Over Time**
+
+![pipe_thinning](https://github.com/user-attachments/assets/02328bf4-90e7-47f2-aa1b-324c773508dd)
+
 
 Every day, mechanical integrity engineers face decisions that can cost millions of dollars or risk catastrophic failure. When a pipe shows signs of thinning, the clock starts ticking. You need answers fast:
 
@@ -35,9 +42,8 @@ The difference between your actual thickness and the retirement limit is your **
 
 This analytical approach transforms the complex retirement decision into a clear, data-driven process that balances operational needs with safety requirements.
 
-## Cross-section of Pipe Wall Thinning Over Time
-![Cross-section of Pipe Wall Thinning Over Time](https://github.com/user-attachments/assets/
-3808cbdb-c252-4678-aa04-b75a6ad5b2db)
+
+
 
 ## Overview
 
