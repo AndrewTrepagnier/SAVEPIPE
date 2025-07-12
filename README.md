@@ -240,7 +240,7 @@ SAVEPIPE is a decision support tool designed to assist qualified engineers in ma
 
 ## Contact
 
-For questions, suggestions, or contributions, please contact [your contact information].
+For questions, suggestions, or contributions, please contact andrew[dot]trepagnier[at]icloud.com
 
 ---
 
