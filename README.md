@@ -125,7 +125,13 @@ report_files = pipe.generate_full_report(actual_thickness=0.060)
 
 ### Output Reports and Visuals
 
+An folder called "Reports" will be automatically generated in the user's root directory and populated with .txt reports and helpful visualizations of the SAVEPIPE analysis.
 
+<img width="3477" height="1649" alt="20250713_165615_thickness_analysis_number_line" src="https://github.com/user-attachments/assets/bf614058-3032-440e-9dae-51471d9d518b" />
+
+The Pipe Wall Profile visual shown above illustrates the actual propertions of actual thicknesses to the nominal pipe wall thickness - making it clear as to how much pipe as erroded and how much pipe remains as well as retirement limit benchmarks along the pipe wall. The Y-axis(x=0) can be interpreted as the original insider diameter of the pipe.
+
+<img width="2968" height="1769" alt="20250713_165615_thickness_comparison_chart" src="https://github.com/user-attachments/assets/1bffe8e2-df37-48bc-afe4-26761c14dc10" />
 
 
 ### Pressure Design (ASME B31.1)
