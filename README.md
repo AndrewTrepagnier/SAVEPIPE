@@ -75,16 +75,51 @@ SAVEPIPE is a sophisticated pipe thickness analysis tool designed for mechanical
 - **Life Span Prediction**: Corrosion-based remaining life estimates
 - **Immediate Action Alerts**: Critical condition notifications
 
-## Installation
+## Install
+
+It is recommended to use a virtual environment:
 
 ```bash
-# Clone the repository
-git clone https://github.com/AndrewTrepagnier/SAVEPIPE.git
-cd SAVEPIPE
-
-# Install dependencies
-pip install -r requirements.txt
+python -m venv venv
+source venv/bin/activate  # On Windows use: venv\Scripts\activate
 ```
+
+Then install SAVEPIPE with pip:
+
+```bash
+pip install savepipe
+```
+
+---
+
+## Example
+
+### Run as a CLI Tool
+
+```bash
+savepipe
+```
+Follow the prompts to analyze your pipe and generate reports.
+
+### Use as a Python API
+
+```python
+from savepipe import SAVEPIPE
+
+pipe = SAVEPIPE(
+    schedule="40",
+    nps="2",
+    pressure=500.0,
+    pressure_class=600,
+    metallurgy="CS A106 GR B",
+    corrosion_rate=10.0  # mpy (optional)
+)
+
+results = pipe.analyze_pipe_thickness(actual_thickness=0.060)
+print(results)
+```
+
+---
 
 ## Quick Start
 
@@ -108,44 +143,10 @@ results = pipe.analyze_pipe_thickness(actual_thickness=0.060)
 report_files = pipe.generate_full_report(actual_thickness=0.060)
 ```
 
-## Usage Examples
+### Output Reports and Visuals
 
-### Basic Analysis
-```python
-# Simple thickness check
-pipe = SAVEPIPE("40", "2", 500.0, 600, "CS A106 GR B")
-results = pipe.analyze_pipe_thickness(actual_thickness=0.060)
 
-print(f"Limiting Factor: {results['limiting_type']}")
-print(f"Status: {'ADEQUATE' if results['limiting_thickness'] <= 0.060 else 'INADEQUATE'}")
-```
 
-### With Corrosion Analysis
-```python
-# Include corrosion rate for life prediction
-pipe = SAVEPIPE(
-    schedule="40", nps="2", pressure=500.0, 
-    pressure_class=600, metallurgy="CS A106 GR B",
-    corrosion_rate=15.0  # 15 mpy corrosion rate
-)
-
-results = pipe.analyze_pipe_thickness(actual_thickness=0.080)
-print(f"Remaining Life: {results.get('life_span', 'N/A')} years")
-```
-
-### Full Report Generation
-```python
-# Generate comprehensive report with visualizations
-report_files = pipe.generate_full_report(actual_thickness=0.060)
-
-# Files automatically saved to Reports/ folder with timestamps
-print("Generated files:")
-for file_type, filepath in report_files.items():
-    if file_type != "analysis_results":
-        print(f"  {file_type}: {filepath}")
-```
-
-## Analysis Criteria
 
 ### Pressure Design (ASME B31.1)
 - Calculates minimum wall thickness for pressure containment
