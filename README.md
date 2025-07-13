@@ -49,32 +49,6 @@ This analytical approach transforms the complex retirement decision into a clear
 
 SAVEPIPE is a sophisticated pipe thickness analysis tool designed for mechanical integrity engineers, reliability specialists, and operations teams in the oil and gas industry. It provides automated analysis of pipe wall thickness against multiple design criteria and generates professional reports with actionable recommendations.
 
-## Key Features
-
-### 🔍 **Comprehensive Analysis**
-- **Pressure Design Analysis**: ASME B31.1 pressure design calculations
-- **Structural Analysis**: API 574 structural minimum thickness requirements
-- **Retirement Limit Assessment**: Multiple retirement limit criteria evaluation
-- **Corrosion Life Prediction**: Remaining service life calculations based on corrosion rates
-
-### 📊 **Professional Reporting**
-- **Detailed Text Reports**: Comprehensive analysis with recommendations
-- **Summary Reports**: Quick overview for management review
-- **Visualizations**: Number line plots and comparison charts
-- **Automatic File Organization**: Date-stamped files in organized Reports folder
-
-### 🛡️ **Safety & Compliance**
-- **Multiple Standards**: ASME B31.1, API 574, and custom Table 5 retirement limits
-- **Risk Assessment**: Automatic identification of critical conditions
-- **Recommendations**: Actionable guidance based on analysis results
-- **Documentation**: Professional reports for regulatory compliance
-
-### ⚡ **Engineering Decision Support**
-- **Limiting Factor Identification**: Determines controlling design criteria
-- **Adequacy Assessment**: Clear pass/fail status for each criterion
-- **Life Span Prediction**: Corrosion-based remaining life estimates
-- **Immediate Action Alerts**: Critical condition notifications
-
 ## Install
 
 It is recommended to use a virtual environment:
