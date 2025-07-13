@@ -91,12 +91,12 @@ class ThicknessVisualizer:
         # Annotate: Move all labels to the top of the plot and rotate them to be parallel with the lines
         y_label = 0.45  # Top of the plot
         label_kwargs = dict(fontsize=10, ha='center', va='bottom', fontweight='bold', rotation=90)
-        ax.text(OD, y_label, 'Outer Dia.', color='grey', **label_kwargs)
-        ax.text(ID, y_label, 'Nominal Inner Dia.', color='black', **label_kwargs)
-        ax.text(x_actual, y_label, 'Actual Inner Dia.', color=self.colors['actual'], **label_kwargs)
-        ax.text(x_api574, y_label, 'API 574 Retirement Limit', color=self.colors['api574'], **label_kwargs)
-        ax.text(x_table5, y_label, 'Default Retirement Limit', color=self.colors['table5'], **label_kwargs)
-        ax.text(x_pressure, y_label, 'Min. Pressure Containing Thk.', color=self.colors['pressure'], **label_kwargs)
+        ax.text(OD, y_label, '      Outer Dia.', color='grey', **label_kwargs)
+        ax.text(ID, y_label, '     Nominal Inner Dia.', color='black', **label_kwargs)
+        ax.text(x_actual, y_label, '     Actual Inner Dia.', color=self.colors['actual'], **label_kwargs)
+        ax.text(x_api574, y_label, '     API 574 Retirement Limit', color=self.colors['api574'], **label_kwargs)
+        ax.text(x_table5, y_label, '     Default Retirement Limit', color=self.colors['table5'], **label_kwargs)
+        ax.text(x_pressure, y_label, '      Min. Pressure Containing Thk.', color=self.colors['pressure'], **label_kwargs)
         plt.tight_layout(rect=[0, 0, 0.85, 1])
         filepath = self._get_filename_with_date("thickness_analysis_number_line")
         plt.savefig(filepath, dpi=300, bbox_inches='tight')
