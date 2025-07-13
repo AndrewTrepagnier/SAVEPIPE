@@ -1,0 +1,17 @@
+
+SAVEPIPE SUMMARY REPORT
+=======================
+
+Pipe: NPS 2, Schedule 40, Class 150
+Metallurgy: CS A106 GR B
+Actual Thickness: 0.0600 inches
+
+OVERALL STATUS: ADEQUATE
+
+Key Values:
+- Pressure Design Min: 0.0025 inches
+- Structural Min: 0.0500 inches  
+- API 574 RL: 0.0500 inches
+- Limiting Factor: pressure
+
+Generated: 2025-07-13 15:00:18

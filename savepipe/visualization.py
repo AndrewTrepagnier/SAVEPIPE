@@ -35,109 +35,72 @@ class ThicknessVisualizer:
                                    actual_thickness: float, 
                                    filename: Optional[str] = None) -> str:
         """
-        Create a number line visualization showing all thickness values
-        
-        Args:
-            analysis_results: Results from analyze_pipe_thickness method
-            actual_thickness: The actual measured thickness
-            filename: Optional filename to save the plot (without extension)
-            
-        Returns:
-            str: Path to saved image file
+        Create a number line visualization: x=0 is ID, x=OD is OD, and all thicknesses are measured from OD back toward ID.
         """
-        
-        # Extract values from analysis results
+        # Extract values
         tmin_pressure = analysis_results.get('tmin_pressure', 0)
-        tmin_structural = analysis_results.get('tmin_structural', 0)
-        default_retirement_limit = analysis_results.get('default_retirement_limit', 0)
         api574_RL = analysis_results.get('api574_RL', 0)
-        limiting_thickness = analysis_results.get('limiting_thickness', 0)
-        
+        default_retirement_limit = analysis_results.get('default_retirement_limit', 0)
+        # Get OD and ID from pipe instance if available
+        pipe = analysis_results.get('pipe', None)
+        if pipe is not None and hasattr(pipe, 'get_OD') and hasattr(pipe, 'get_ID'):
+            OD = pipe.get_OD()
+            ID = pipe.get_ID()
+        else:
+            # Fallback: use max value for OD, 0 for ID
+            OD = max([actual_thickness, tmin_pressure, api574_RL]) * 2
+            ID = 0
+        # All thicknesses are measured from OD back toward ID
+        x_actual = OD - actual_thickness
+        x_api574 = OD - api574_RL
+        x_pressure = OD - tmin_pressure
+        x_table5 = OD - default_retirement_limit
         # Create figure and axis
-        fig, ax = plt.subplots(figsize=(12, 6))
-        
-        # Create number line
-        all_values = [actual_thickness, tmin_pressure, tmin_structural, 
-                     default_retirement_limit, api574_RL, limiting_thickness]
-        min_val = min([v for v in all_values if v is not None and v > 0]) * 0.8
-        max_val = max([v for v in all_values if v is not None]) * 1.2
-        
-        # Plot number line
-        ax.plot([min_val, max_val], [0, 0], 'k-', linewidth=2, alpha=0.3)
-        
-        # Plot each thickness value
-        y_positions = [0.2, 0.4, 0.6, 0.8, 1.0, 1.2]
-        labels = []
-        
-        # Actual thickness
-        if actual_thickness is not None:
-            ax.scatter(actual_thickness, y_positions[0], color=self.colors['actual'], 
-                      s=100, zorder=5, label='Actual Thickness')
-            ax.axvline(actual_thickness, color=self.colors['actual'], alpha=0.3, linestyle='--')
-            labels.append(f'Actual: {actual_thickness:.4f}"')
-        
-        # Pressure design minimum
-        if tmin_pressure is not None:
-            ax.scatter(tmin_pressure, y_positions[1], color=self.colors['pressure'], 
-                      s=100, zorder=5, label='Pressure Design Min')
-            ax.axvline(tmin_pressure, color=self.colors['pressure'], alpha=0.3, linestyle='--')
-            labels.append(f'Pressure Min: {tmin_pressure:.4f}"')
-        
-        # Structural minimum
-        if tmin_structural is not None:
-            ax.scatter(tmin_structural, y_positions[2], color=self.colors['structural'], 
-                      s=100, zorder=5, label='Structural Min')
-            ax.axvline(tmin_structural, color=self.colors['structural'], alpha=0.3, linestyle='--')
-            labels.append(f'Structural Min: {tmin_structural:.4f}"')
-        
-        # Table 5 retirement limit
-        if default_retirement_limit is not None:
-            ax.scatter(default_retirement_limit, y_positions[3], color=self.colors['table5'], 
-                      s=100, zorder=5, label='Table 5 RL')
-            ax.axvline(default_retirement_limit, color=self.colors['table5'], alpha=0.3, linestyle='--')
-            labels.append(f'Table 5 RL: {default_retirement_limit:.4f}"')
-        
-        # API 574 retirement limit
-        if api574_RL is not None:
-            ax.scatter(api574_RL, y_positions[4], color=self.colors['api574'], 
-                      s=100, zorder=5, label='API 574 RL')
-            ax.axvline(api574_RL, color=self.colors['api574'], alpha=0.3, linestyle='--')
-            labels.append(f'API 574 RL: {api574_RL:.4f}"')
-        
-        # Limiting thickness
-        if limiting_thickness is not None:
-            ax.scatter(limiting_thickness, y_positions[5], color=self.colors['limiting'], 
-                      s=150, zorder=6, label='Limiting Thickness', marker='*')
-            ax.axvline(limiting_thickness, color=self.colors['limiting'], alpha=0.5, linewidth=2)
-            labels.append(f'Limiting: {limiting_thickness:.4f}"')
-        
-        # Customize the plot
-        ax.set_xlim(min_val, max_val)
-        ax.set_ylim(-0.5, 1.5)
-        ax.set_xlabel('Thickness (inches)', fontsize=12, fontweight='bold')
-        ax.set_title('Pipe Thickness Analysis - Number Line View', fontsize=14, fontweight='bold')
-        ax.grid(True, alpha=0.3)
-        ax.legend(loc='upper right', bbox_to_anchor=(1, 1))
-        
-        # Add text annotations
-        for i, label in enumerate(labels):
-            if i < len(y_positions):
-                ax.text(max_val * 1.05, y_positions[i], label, fontsize=10, 
-                       verticalalignment='center')
-        
-        # Add status information
-        limiting_type = analysis_results.get('limiting_type', 'Unknown')
-        status_text = f"Limiting Factor: {limiting_type}"
-        ax.text(0.02, 0.98, status_text, transform=ax.transAxes, fontsize=12,
-               verticalalignment='top', bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.8))
-        
-        plt.tight_layout()
-        
-        # Save the plot
+        fig, ax = plt.subplots(figsize=(12, 3))
+        # Shade fluid region (from ID to actual thickness)
+        ax.axvspan(ID, x_actual, color='deepskyblue', alpha=0.3, label='Fluid')
+        # Shade pipe wall region (from actual thickness to OD)
+        ax.axvspan(x_actual, OD, color='lightgrey', alpha=0.5, label='Remaining Pipe Wall')
+        # Draw OD as thick grey line
+        ax.axvline(OD, color='grey', linewidth=10, alpha=0.7, label='OD')
+        # Draw ID as y-axis (x=0)
+        ax.axvline(ID, color='black', linewidth=2, linestyle='-', label='Nominal ID')
+        # Draw actual thickness
+        ax.axvline(x_actual, color=self.colors['actual'], linewidth=3, label='Actual Thk.')
+        # Draw API 574 RL
+        ax.axvline(x_api574, color=self.colors['api574'], linewidth=2, linestyle='--', label='API 574 RL')
+        # Draw Table 5 RL
+        ax.axvline(x_table5, color=self.colors['table5'], linewidth=2, linestyle='--', label='Default RL')
+        # Draw pressure min
+        ax.axvline(x_pressure, color=self.colors['pressure'], linewidth=2, linestyle='--', label='Min. Pressure Thk.')
+        # Customize
+        ax.set_xlim(ID - 0.1 * (OD - ID), OD + 0.1 * (OD - ID))
+        ax.set_ylim(-0.5, 0.5)
+        ax.set_yticks([0])
+        ax.set_yticklabels([''])
+        ax.set_xlabel('Profile of Pipe Wall', fontsize=12, fontweight='bold')
+        # Remove the top title
+        # ax.set_title('Pipe Wall Thickness Profile', fontsize=14, fontweight='bold')
+        ax.grid(True, which='both', axis='x', alpha=0.3)
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+        ax.spines['left'].set_visible(False)
+        ax.spines['bottom'].set_linewidth(1.5)
+        # Move legend outside plot to the right
+        ax.legend(loc='center left', bbox_to_anchor=(1.02, 0.5), borderaxespad=0., frameon=True)
+        # Annotate: Move all labels to the top of the plot and rotate them to be parallel with the lines
+        y_label = 0.45  # Top of the plot
+        label_kwargs = dict(fontsize=10, ha='center', va='bottom', fontweight='bold', rotation=90)
+        ax.text(OD, y_label, 'Outer Dia.', color='grey', **label_kwargs)
+        ax.text(ID, y_label, 'Nominal Inner Dia.', color='black', **label_kwargs)
+        ax.text(x_actual, y_label, 'Actual Inner Dia.', color=self.colors['actual'], **label_kwargs)
+        ax.text(x_api574, y_label, 'API 574 Retirement Limit', color=self.colors['api574'], **label_kwargs)
+        ax.text(x_table5, y_label, 'Default Retirement Limit', color=self.colors['table5'], **label_kwargs)
+        ax.text(x_pressure, y_label, 'Min. Pressure Containing Thk.', color=self.colors['pressure'], **label_kwargs)
+        plt.tight_layout(rect=[0, 0, 0.85, 1])
         filepath = self._get_filename_with_date("thickness_analysis_number_line")
         plt.savefig(filepath, dpi=300, bbox_inches='tight')
         plt.close()
-        
         return filepath
     
     def create_comparison_chart(self, analysis_results: Dict[str, Any], 
