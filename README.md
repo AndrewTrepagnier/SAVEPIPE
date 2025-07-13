@@ -84,8 +84,8 @@ from savepipe.core import SAVEPIPE
 pipe = SAVEPIPE(
     schedule="40",
     nps="2", 
-    pressure=500.0,
-    pressure_class=600,
+    pressure=50.0,
+    pressure_class=150,
     metallurgy="CS A106 GR B",
     corrosion_rate=10.0  # mpy (optional)
 )
@@ -100,6 +100,15 @@ report_files = pipe.generate_full_report(actual_thickness=0.060)
 ### Output Reports and Visuals
 
 An folder called "Reports" will be automatically generated in the user's root directory and populated with .txt reports and helpful visualizations of the SAVEPIPE analysis.
+
+All files are automatically named with timestamps:
+```
+Reports/
+├── 20250712_181928_SAVEPIPE_report_SAVEPIPE_20250712_181928.txt
+├── 20250712_181928_SAVEPIPE_summary_20250712_181928.txt
+├── 20250712_181928_thickness_analysis_number_line.png
+└── 20250712_181928_thickness_comparison_chart.png
+```
 
 <img width="3477" height="1649" alt="20250713_165615_thickness_analysis_number_line" src="https://github.com/user-attachments/assets/bf614058-3032-440e-9dae-51471d9d518b" />
 
@@ -128,27 +137,6 @@ The Pipe Wall Profile visual shown above illustrates the actual propertions of a
 - **Corrosion Allowance**: Thickness above retirement limits
 - **Monitoring Recommendations**: Inspection frequency guidance
 
-## Output Files
-
-When you run a full analysis, SAVEPIPE automatically creates a `Reports/` folder and generates:
-
-### 📄 **Text Reports**
-- **Full Report**: Comprehensive analysis with all details and recommendations
-- **Summary Report**: Executive summary for management review
-
-### 📊 **Visualizations**
-- **Number Line Plot**: Shows all thickness values on a scale for easy comparison
-- **Comparison Chart**: Bar chart highlighting the limiting factor
-
-### 📁 **File Naming**
-All files are automatically named with timestamps:
-```
-Reports/
-├── 20250712_181928_SAVEPIPE_report_SAVEPIPE_20250712_181928.txt
-├── 20250712_181928_SAVEPIPE_summary_20250712_181928.txt
-├── 20250712_181928_thickness_analysis_number_line.png
-└── 20250712_181928_thickness_comparison_chart.png
-```
 
 ## Supported Pipe Specifications
 
@@ -193,7 +181,7 @@ This project is designed for the mechanical integrity engineering community. Con
 
 ## License
 
-[Add your license information here]
+MIT License
 
 ## Disclaimer
 
@@ -201,7 +189,9 @@ SAVEPIPE is a decision support tool designed to assist qualified engineers in ma
 
 ## Contact
 
-For questions, suggestions, or contributions, please contact andrew[dot]trepagnier[at]icloud.com
+For questions, suggestions, or contributions, please contact:
+
+andrew[dot]trepagnier[at]icloud.com
 
 ---
 
