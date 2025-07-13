@@ -1,0 +1,20 @@
+Metadata-Version: 2.4
+Name: savepipe
+Version: 0.1.0
+Summary: Pipe Thickness Analysis & Retirement Planning for Mechanical Integrity Engineering
+Author: Andrew Trepagnier
+Author-email: your.email@example.com
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.7
+License-File: LICENSE
+Requires-Dist: numpy>=1.23
+Requires-Dist: matplotlib>=3.5
+Dynamic: author
+Dynamic: author-email
+Dynamic: classifier
+Dynamic: license-file
+Dynamic: requires-dist
+Dynamic: requires-python
+Dynamic: summary
