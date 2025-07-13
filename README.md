@@ -101,27 +101,7 @@ savepipe
 ```
 Follow the prompts to analyze your pipe and generate reports.
 
-### Use as a Python API
-
-```python
-from savepipe import SAVEPIPE
-
-pipe = SAVEPIPE(
-    schedule="40",
-    nps="2",
-    pressure=500.0,
-    pressure_class=600,
-    metallurgy="CS A106 GR B",
-    corrosion_rate=10.0  # mpy (optional)
-)
-
-results = pipe.analyze_pipe_thickness(actual_thickness=0.060)
-print(results)
-```
-
----
-
-## Quick Start
+### Or Use as a Python API
 
 ```python
 from savepipe.core import SAVEPIPE
