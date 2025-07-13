@@ -32,7 +32,7 @@ Imagine a pipe wall gradually thinning over a 10-year span, slowly approaching a
 
 ### The Two Minimum Thickness Requirements
 
-Pipe design involves two distinct minimum thickness calculations. The **pressure design minimum** ensures the pipe can contain internal pressure safely using ASME B31.1 equations that consider design pressure, temperature effects, and material properties. The **structural minimum** ensures the pipe can support its own weight and external loads according to API 574 Table D.2 requirements, which becomes critical for long spans or heavy contents.
+Pipe design involves two distinct minimum thickness calculations. The **pressure design minimum** ensures the pipe can contain internal pressure safely using ASME B31.1 equations that consider design pressure, temperature effects, and material properties. The **structural minimum** ensures the pipe can support its own weight and external loads according to API 574 Table D.2 requirements, which becomes critical for per-code pipe spans. However, this package does not account for fluid weight, insulation, heat tracing equipment, pipe hangers, and other per-application basis.
 
 The **limiting thickness** is whichever of these two values is more restrictive. SAVEPIPE automatically determines which factor controls your design and provides clear guidance on current status, remaining life, and required actions.
 
