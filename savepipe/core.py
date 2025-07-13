@@ -1,8 +1,8 @@
 from .asmetables.od_table import trueOD_40, trueOD_80, trueOD_10, trueOD_120, trueOD_160
 from .asmetables.wsrf import WSRF
-from .asmetables.y_coeff import ferritic_steels_y
+from .asmetables.y_coeff import ferritic_steels_y, austenitic_steels_y, other_metals_y, nickel_alloy_N06690_y, nickel_alloys_N06617_N08800_N08810_N08825_y, cast_iron_y
 from .asmetables.yield_stress import S_, E_
-from .asmetables.api_574 import API574_CS_400F
+from .asmetables.api_574 import API574_CS_400F, API574_SS_400F
 
 import numpy as np
 from dataclasses import dataclass
@@ -43,6 +43,7 @@ class SAVEPIPE:
     S_allow = S_
     E_ = E_
     API574_CS_400F = API574_CS_400F
+    API574_SS_400F = API574_SS_400F
 
     #########################
     # Add propreitary JSON file or CSV of retirement limit structural thicknesses below to be considered into the analysis, if not, comment out
@@ -57,13 +58,19 @@ class SAVEPIPE:
         except Exception:
             print(f"Could not convert NPS '{self.nps}' to float for API574 lookup.")
             return None
+        
         if self.metallurgy == "CS A106 GR B":
             api574_specified_tmin = API574_CS_400F.get(nps_key, {}).get(self.pressure_class)
             if api574_specified_tmin is None:
                 print(f"No API574 value for NPS {nps_key} and class {self.pressure_class}")
             return api574_specified_tmin
-        #elif self.metallurgy == "SS 316/316S":
-            #api574_specified_tmin = TODO   
+        
+        elif self.metallurgy == "SS 316/316S":
+            api574_specified_tmin = API574_SS_400F
+            if api574_specified_tmin is None:
+                print(f"No API574 value for NPS {nps_key} and class {self.pressure_class}")
+            return api574_specified_tmin
+        
         else:
             print("No API574 Table Available for this Metallurgy")
             return None
@@ -89,8 +96,11 @@ class SAVEPIPE:
 
     def get_Y_coefficient(self) -> float:
         """Get Y coefficient from ASME B31.1 Table 104.1.2-1"""
-        return self.ferritic_steels_y[900] # For most process CS pipes, the y coefficient for 900°F (482°C) and below is used, which is y = 0.4 for ferritic steels (the most common type of CS pipe)
-    
+        if self.metallurgy =='CS A106 GR B':
+            return self.ferritic_steels_y[900]
+        elif self.metallurgy =='SS 316/316S':
+            return self.austenitic_steels_y[900]
+        
 
     #####################################################################################
     # CALCULATIONS 
@@ -306,14 +316,12 @@ class SAVEPIPE:
         }
 
 
-# TODO: Implement logic to propose new retirement limits
-# The new retirement limit should be based on:
-#   - Corrosion rates (as determined by inspection and process teams)
-#   - Remaining service life requirements
-#   - Regulatory or company standards
-# This may require:
-#   - Accepting corrosion rate as an input (e.g., mils per year)
-#   - Calculating remaining life based on current thickness, corrosion rate, and required future service duration
-#   - Setting the new retirement limit to ensure safe operation until next planned inspection or end of service life
+# TODO
+
+#   - Make Visualizer more readable and add visual tool and report explainations in README
+#   - Add cli.py and __init__
+#   - Add Setup.py, requirements.txt, makefile, ect.
+#   - Fix allowable stress calculator
+#   - Explain how to import properietary JSON files of piping maintenance defaults
 #   - Add other metallurgy and temps to structural tmin py dictionaries
 #   - Add other metallurgy yield strengths to py dictionaries under S_
