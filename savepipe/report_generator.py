@@ -38,20 +38,20 @@ Limiting Factor: {limiting_type}
 
 RETIREMENT LIMITS
 -----------------
-Table 5 Retirement Limit: {table5_RL:.4f} inches
+Retirement Limit: {retirement_limit}
 API 574 Retirement Limit: {api574_RL:.4f} inches
 
 THICKNESS ANALYSIS
 ------------------
 Pressure Design Adequacy: {pressure_adequate}
 Structural Adequacy: {structural_adequate}
-Table 5 Status: {table5_status}
+Retirement Status: {retirement_status}
 API 574 Status: {api574_status}
 
 CORROSION ALLOWANCE
 -------------------
 Above API 574 RL: {above_api574} inches
-Below Table 5 RL: {below_table5} inches
+Below Retirement Limit: {below_retirement} inches
 Estimated Life Span: {life_span} years
 
 RECOMMENDATIONS
@@ -96,14 +96,15 @@ NOTES
         pressure_adequate = "ADEQUATE" if actual_thickness >= analysis_results.get('tmin_pressure', 0) else "INADEQUATE"
         structural_adequate = "ADEQUATE" if actual_thickness >= analysis_results.get('tmin_structural', 0) else "INADEQUATE"
         
-        # Table 5 status
-        table5_RL = analysis_results.get('default_retirement_limit', 0)
-        if table5_RL and actual_thickness >= table5_RL:
-            table5_status = "ABOVE RETIREMENT LIMIT"
-        elif table5_RL:
-            table5_status = f"BELOW RETIREMENT LIMIT by {table5_RL - actual_thickness:.4f} inches"
+        # Replace Table 5 RL with Retirement Limit
+        retirement_limit = analysis_results.get('default_retirement_limit', None)
+        retirement_limit_str = f"{retirement_limit:.4f}" if retirement_limit is not None else "N/A"
+        if retirement_limit is not None and actual_thickness >= retirement_limit:
+            retirement_status = "ABOVE RETIREMENT LIMIT"
+        elif retirement_limit is not None:
+            retirement_status = f"BELOW RETIREMENT LIMIT by {retirement_limit - actual_thickness:.4f} inches"
         else:
-            table5_status = "NO DATA AVAILABLE"
+            retirement_status = "NO DATA AVAILABLE"
         
         # API 574 status
         api574_RL = analysis_results.get('api574_RL', 0)
@@ -136,14 +137,14 @@ NOTES
             tmin_structural=analysis_results.get('tmin_structural', 0),
             limiting_thickness=analysis_results.get('limiting_thickness', 0),
             limiting_type=analysis_results.get('limiting_type', 'Unknown'),
-            table5_RL=table5_RL,
+            retirement_limit=retirement_limit_str,
             api574_RL=api574_RL,
             pressure_adequate=pressure_adequate,
             structural_adequate=structural_adequate,
-            table5_status=table5_status,
+            retirement_status=retirement_status,
             api574_status=api574_status,
             above_api574=analysis_results.get('above_api574RL', 'N/A'),
-            below_table5=analysis_results.get('below_defaultRL', 'N/A'),
+            below_retirement=analysis_results.get('below_defaultRL', 'N/A'),
             life_span=analysis_results.get('life_span', 'N/A'),
             recommendations=recommendations,
             notes=notes
@@ -181,10 +182,10 @@ NOTES
             recommendations.append("• RETIREMENT RECOMMENDED: Below API 574 retirement limit")
             recommendations.append("• Immediate retirement or detailed engineering assessment required")
         
-        # Check Table 5 retirement limit
-        table5_RL = analysis_results.get('default_retirement_limit', 0)
-        if table5_RL and actual_thickness < table5_RL:
-            recommendations.append("• MONITORING REQUIRED: Below Table 5 retirement limit")
+        # Check Retirement Limit
+        retirement_limit = analysis_results.get('default_retirement_limit', 0)
+        if retirement_limit and actual_thickness < retirement_limit:
+            recommendations.append("• MONITORING REQUIRED: Below Retirement Limit")
             recommendations.append("• Increase inspection frequency")
         
         # Check life span
@@ -237,8 +238,17 @@ NOTES
         tmin_pressure = analysis_results.get('tmin_pressure', 0)
         tmin_structural = analysis_results.get('tmin_structural', 0)
         api574_RL = analysis_results.get('api574_RL', 0)
-        
-        if actual_thickness < min([tmin_pressure, tmin_structural, api574_RL]):
+        retirement_limit = analysis_results.get('default_retirement_limit', None)
+
+        # Filter out None values for min/max comparisons
+        thickness_values = [tmin_pressure, tmin_structural, api574_RL]
+        if retirement_limit is not None:
+            thickness_values.append(retirement_limit)
+        # Debug print
+        print(f"DEBUG: tmin_pressure={tmin_pressure}, tmin_structural={tmin_structural}, api574_RL={api574_RL}, retirement_limit={retirement_limit}")
+        print(f"DEBUG: thickness_values for min/max: {thickness_values}")
+
+        if actual_thickness < min(thickness_values):
             status = "CRITICAL - IMMEDIATE ACTION REQUIRED"
         elif actual_thickness < api574_RL:
             status = "RETIREMENT RECOMMENDED"
@@ -247,6 +257,7 @@ NOTES
         else:
             status = "ADEQUATE"
         
+        retirement_limit_str = f"{retirement_limit:.4f}" if retirement_limit is not None else "N/A"
         summary_content = f"""
 SAVEPIPE SUMMARY REPORT
 =======================
@@ -261,6 +272,7 @@ Key Values:
 - Pressure Design Min: {tmin_pressure:.4f} inches
 - Structural Min: {tmin_structural:.4f} inches  
 - API 574 RL: {api574_RL:.4f} inches
+- Retirement Limit: {retirement_limit_str} inches
 - Limiting Factor: {analysis_results.get('limiting_type', 'Unknown')}
 
 Generated: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}

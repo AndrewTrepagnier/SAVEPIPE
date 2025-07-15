@@ -4,7 +4,9 @@ Test script for SAVEPIPE package
 Contains usage examples and test cases for pipe thickness analysis
 """
 
-from savepipe.core import SAVEPIPE
+import pytest
+
+from savepipe import SAVEPIPE
 
 def test_basic_analysis():
     """Test basic pipe thickness analysis"""
@@ -165,6 +167,22 @@ def test_report_generation():
 #         print(f"High pressure test - Limiting thickness: {results['limiting_thickness']:.4f}")
 #     except Exception as e:
 #         print(f"High pressure test error: {e}")
+
+def test_practice_scenario():
+    pipe = SAVEPIPE(
+        schedule="40",
+        nps="2",
+        pressure=50.0,
+        pressure_class=150,
+        metallurgy="CS A106 GR B",
+        corrosion_rate=10.0,
+        default_retirement_limit=0.12
+    )
+    results = pipe.analyze_pipe_thickness(actual_thickness=0.15)
+    assert results["default_retirement_limit"] == 0.12
+    assert results["limiting_thickness"] == max(results["tmin_pressure"], results["tmin_structural"])
+    assert results["below_defaultRL"] == pytest.approx(0.12 - 0.15, abs=1e-6) or results["below_defaultRL"] is None
+    print("Practice scenario test passed.")
 
 def main():
     """Main test function"""

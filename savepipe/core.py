@@ -25,6 +25,7 @@ class SAVEPIPE:
     metallurgy: Literal["CS A106 GR B", "SS 316/316S", "SS 304", "Inconel 625"]
     pipe_config: Literal["straight", "bend-90", "bend-45", "tee", "elbow"] = "straight"  # Pipe configuration
     corrosion_rate: Optional[float] = None #mpy 
+    default_retirement_limit: Optional[float] = None
 
     # Valid pipe types for reference
     VALID_PIPE_TYPES = ["straight", "bend-90", "bend-45", "tee", "elbow"]
@@ -48,10 +49,6 @@ class SAVEPIPE:
     #########################
     # Add propreitary JSON file or CSV of retirement limit structural thicknesses below to be considered into the analysis, if not, comment out
 
-    def load_table(self):
-        with open('table5.json', 'r') as file:
-            return json.load(file)
-        
     def which_API_table(self) -> float:
         try:
             nps_key = float(self.nps)
@@ -213,15 +210,9 @@ class SAVEPIPE:
         tmin_structural = self.tmin_structural()
 
         
-        table5 = self.load_table() # table5 is a propreitary piping maintenace table, users can use any default retirement limit standards they wish 
-        default_retirement_limit = table5.get(self.nps)
-
-
-        # 4. Proposed retirement limit (user input or logic)
-        # if proposed_retirement_limit is None:
-        #     proposed_retirement_limit = table5_retirement_limit  # fallback
-        # 5. Find limiting thickness
-
+        # Use the provided default_retirement_limit if available
+        default_retirement_limit = self.default_retirement_limit
+        
         limits = {
             "pressure": tmin_pressure,
             "structural": tmin_structural,
@@ -233,8 +224,8 @@ class SAVEPIPE:
 
 
         # Determines force contribution dictates the mechanical integrity and longevity of the pipe
-        # Often, structural integrity(pipe deflection due to weight) is the controlling (or limiting) force contributor; however, it is essential to check
-        if limits["pressure"] < limits["structural"]:
+        # The limiting thickness is the LARGER of pressure or structural tmin (i.e., the most conservative, requiring replacement at the highest threshold)
+        if limits["pressure"] > limits["structural"]:
             limiting_thickness = limits["pressure"]
             limiting_type = "pressure"
         else:

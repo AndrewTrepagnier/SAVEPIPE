@@ -1,4 +1,4 @@
-# SAVEPIPE - Still under development
+# SAVEPIPE 
 The Industry-proven tool for determining retirement limits of process piping.
 
 
@@ -49,6 +49,32 @@ This analytical approach transforms the complex retirement decision into a clear
 
 SAVEPIPE is a sophisticated pipe thickness analysis tool designed for mechanical integrity engineers, reliability specialists, and operations teams in the oil and gas industry. It provides automated analysis of pipe wall thickness against multiple design criteria and generates professional reports with actionable recommendations.
 
+## Key Features
+
+### 🔍 **Comprehensive Analysis**
+- **Pressure Design Analysis**: ASME B31.1 pressure design calculations
+- **Structural Analysis**: API 574 structural minimum thickness requirements
+- **Retirement Limit Assessment**: Multiple retirement limit criteria evaluation
+- **Corrosion Life Prediction**: Remaining service life calculations based on corrosion rates
+
+### 📊 **Professional Reporting**
+- **Detailed Text Reports**: Comprehensive analysis with recommendations
+- **Summary Reports**: Quick overview for management review
+- **Visualizations**: Number line plots and comparison charts
+- **Automatic File Organization**: Date-stamped files in organized Reports folder
+
+### 🛡️ **Safety & Compliance**
+- **Multiple Standards**: ASME B31.1, API 574, and custom Table 5 retirement limits
+- **Risk Assessment**: Automatic identification of critical conditions
+- **Recommendations**: Actionable guidance based on analysis results
+- **Documentation**: Professional reports for regulatory compliance
+
+### ⚡ **Engineering Decision Support**
+- **Limiting Factor Identification**: Determines controlling design criteria
+- **Adequacy Assessment**: Clear pass/fail status for each criterion
+- **Life Span Prediction**: Corrosion-based remaining life estimates
+- **Immediate Action Alerts**: Critical condition notifications
+
 ## Install
 
 It is recommended to use a virtual environment:
@@ -97,24 +123,11 @@ results = pipe.analyze_pipe_thickness(actual_thickness=0.060)
 report_files = pipe.generate_full_report(actual_thickness=0.060)
 ```
 
-### Output Reports and Visuals
+### Example Output of Reports and Visuals
 
 An folder called "Reports" will be automatically generated in the user's root directory and populated with .txt reports and helpful visualizations of the SAVEPIPE analysis.
 
-All files are automatically named with timestamps:
-```
-Reports/
-├── 20250712_181928_SAVEPIPE_report_SAVEPIPE_20250712_181928.txt
-├── 20250712_181928_SAVEPIPE_summary_20250712_181928.txt
-├── 20250712_181928_thickness_analysis_number_line.png
-└── 20250712_181928_thickness_comparison_chart.png
-```
 
-<img width="3477" height="1649" alt="20250713_165615_thickness_analysis_number_line" src="https://github.com/user-attachments/assets/bf614058-3032-440e-9dae-51471d9d518b" />
-
-The Pipe Wall Profile visual shown above illustrates the actual propertions of actual thicknesses to the nominal pipe wall thickness - making it clear as to how much pipe as erroded and how much pipe remains as well as retirement limit benchmarks along the pipe wall. The Y-axis(x=0) can be interpreted as the original insider diameter of the pipe.
-
-<img width="2968" height="1769" alt="20250713_165615_thickness_comparison_chart" src="https://github.com/user-attachments/assets/1bffe8e2-df37-48bc-afe4-26761c14dc10" />
 
 
 ### Pressure Design (ASME B31.1)
@@ -137,6 +150,27 @@ The Pipe Wall Profile visual shown above illustrates the actual propertions of a
 - **Corrosion Allowance**: Thickness above retirement limits
 - **Monitoring Recommendations**: Inspection frequency guidance
 
+## Output Files
+
+When you run a full analysis, SAVEPIPE automatically creates a `Reports/` folder and generates:
+
+### 📄 **Text Reports**
+- **Full Report**: Comprehensive analysis with all details and recommendations
+- **Summary Report**: Executive summary for management review
+
+### 📊 **Visualizations**
+- **Number Line Plot**: Shows all thickness values on a scale for easy comparison
+- **Comparison Chart**: Bar chart highlighting the limiting factor
+
+### 📁 **File Naming**
+All files are automatically named with timestamps:
+```
+Reports/
+├── 20250712_181928_SAVEPIPE_report_SAVEPIPE_20250712_181928.txt
+├── 20250712_181928_SAVEPIPE_summary_20250712_181928.txt
+├── 20250712_181928_thickness_analysis_number_line.png
+└── 20250712_181928_thickness_comparison_chart.png
+```
 
 ## Supported Pipe Specifications
 
@@ -181,7 +215,7 @@ This project is designed for the mechanical integrity engineering community. Con
 
 ## License
 
-MIT License
+[Add your license information here]
 
 ## Disclaimer
 
@@ -189,9 +223,7 @@ SAVEPIPE is a decision support tool designed to assist qualified engineers in ma
 
 ## Contact
 
-For questions, suggestions, or contributions, please contact:
-
-andrew[dot]trepagnier[at]icloud.com
+For questions, suggestions, or contributions, please contact andrew[dot]trepagnier[at]icloud.com
 
 ---
 

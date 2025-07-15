@@ -69,8 +69,8 @@ class ThicknessVisualizer:
         ax.axvline(x_actual, color=self.colors['actual'], linewidth=3, label='Actual Thk.')
         # Draw API 574 RL
         ax.axvline(x_api574, color=self.colors['api574'], linewidth=2, linestyle='--', label='API 574 RL')
-        # Draw Table 5 RL
-        ax.axvline(x_table5, color=self.colors['table5'], linewidth=2, linestyle='--', label='Default RL')
+        # Draw Retirement Limit
+        ax.axvline(x_table5, color=self.colors['table5'], linewidth=2, linestyle='--', label='Retirement Limit')
         # Draw pressure min
         ax.axvline(x_pressure, color=self.colors['pressure'], linewidth=2, linestyle='--', label='Min. Pressure Thk.')
         # Customize
@@ -95,7 +95,7 @@ class ThicknessVisualizer:
         ax.text(ID, y_label, '     Nominal Inner Dia.', color='black', **label_kwargs)
         ax.text(x_actual, y_label, '     Actual Inner Dia.', color=self.colors['actual'], **label_kwargs)
         ax.text(x_api574, y_label, '     API 574 Retirement Limit', color=self.colors['api574'], **label_kwargs)
-        ax.text(x_table5, y_label, '     Default Retirement Limit', color=self.colors['table5'], **label_kwargs)
+        ax.text(x_table5, y_label, '     Retirement Limit', color=self.colors['table5'], **label_kwargs)
         ax.text(x_pressure, y_label, '      Min. Pressure Containing Thk.', color=self.colors['pressure'], **label_kwargs)
         plt.tight_layout(rect=[0, 0, 0.85, 1])
         filepath = self._get_filename_with_date("thickness_analysis_number_line")
@@ -123,7 +123,7 @@ class ThicknessVisualizer:
             'Actual': actual_thickness,
             'Pressure Min': analysis_results.get('tmin_pressure', 0),
             'Structural Min': analysis_results.get('tmin_structural', 0),
-            'Table 5 RL': analysis_results.get('default_retirement_limit', 0),
+            'Retirement Limit': analysis_results.get('default_retirement_limit', 0),
             'API 574 RL': analysis_results.get('api574_RL', 0)
         }
         
