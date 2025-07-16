@@ -149,5 +149,43 @@ def test_future_inspection_year_error():
     with pytest.raises(ValueError, match="cannot be in the future"):
         pipe.analysis(measured_thickness=0.060, year_inspected=2030)
 
+def test_nps_fraction_conversion():
+    """Test that NPS fraction conversion works correctly"""
+    # Test simple fractions
+    pipe1 = PIPE(
+        schedule="40",
+        nps="3/4",
+        pressure=50.0,
+        pressure_class=150,
+        metallurgy="CS A106 GR B"
+    )
+    
+    # Test mixed numbers
+    pipe2 = PIPE(
+        schedule="40",
+        nps="1-1/2",
+        pressure=50.0,
+        pressure_class=150,
+        metallurgy="CS A106 GR B"
+    )
+    
+    # Test whole numbers
+    pipe3 = PIPE(
+        schedule="40",
+        nps="2",
+        pressure=50.0,
+        pressure_class=150,
+        metallurgy="CS A106 GR B"
+    )
+    
+    # Verify the conversion works by checking that analysis runs without errors
+    results1 = pipe1.analysis(measured_thickness=0.060)
+    results2 = pipe2.analysis(measured_thickness=0.060)
+    results3 = pipe3.analysis(measured_thickness=0.060)
+    
+    assert results1 is not None
+    assert results2 is not None
+    assert results3 is not None
+
 if __name__ == "__main__":
     pytest.main([__file__])

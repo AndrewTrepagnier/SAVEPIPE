@@ -52,10 +52,33 @@ class PIPE:
     # PARSE TABLES
     ##########################################
     
+    def _convert_nps_to_float(self, nps_str: str) -> float:
+        """Convert NPS string to float, handling fractions like '3/4'"""
+        try:
+            # First try direct conversion
+            return float(nps_str)
+        except ValueError:
+            # If that fails, try to evaluate as a fraction
+            try:
+                # Handle fractions like '3/4', '1-1/2', etc.
+                if '-' in nps_str:
+                    # Handle mixed numbers like '1-1/2'
+                    parts = nps_str.split('-')
+                    if len(parts) == 2:
+                        whole = float(parts[0])
+                        fraction = eval(parts[1])  # Safe here as we control the input
+                        return whole + fraction
+                    else:
+                        raise ValueError(f"Invalid NPS format: {nps_str}")
+                else:
+                    # Handle simple fractions like '3/4'
+                    return eval(nps_str)  # Safe here as we control the input
+            except:
+                raise ValueError(f"Could not convert NPS '{nps_str}' to float")
 
     def which_API_table(self) -> float:
         try:
-            nps_key = float(self.nps)
+            nps_key = self._convert_nps_to_float(self.nps)
         except Exception:
             print(f"Could not convert NPS '{self.nps}' to float for API574 lookup.")
             return None
@@ -91,6 +114,23 @@ class PIPE:
             return self.trueOD_120.get(self.nps)
         elif self.schedule == "160":
             return self.trueOD_160.get(self.nps)
+        else:
+            raise ValueError(f"Invalid schedule: {self.schedule}")
+
+    def get_ID(self) -> float:
+        """Get nominal inside diameter based on schedule and NPS"""
+        from .asmetables.id_table import trueID_10, trueID_40, trueID_80, trueID_120, trueID_160
+        
+        if self.schedule == "10":
+            return trueID_10.get(self.nps)
+        elif self.schedule == "40":
+            return trueID_40.get(self.nps)
+        elif self.schedule == "80":
+            return trueID_80.get(self.nps)
+        elif self.schedule == "120":
+            return trueID_120.get(self.nps)
+        elif self.schedule == "160":
+            return trueID_160.get(self.nps)
         else:
             raise ValueError(f"Invalid schedule: {self.schedule}")
 
@@ -142,7 +182,7 @@ class PIPE:
     
     def tmin_structural(self) -> float:
         """API 574 Table D.2"""
-        nps_key = float(self.nps)
+        nps_key = self._convert_nps_to_float(self.nps)
         min_structural = self.API574_CS_400F[nps_key][self.pressure_class] #Only have 500F CS 
         return min_structural
     
@@ -341,7 +381,7 @@ class PIPE:
         
         # Generate visualizations
         visualizer = ThicknessVisualizer()
-        number_line_path = visualizer.create_thickness_number_line(analysis_results, actual_thickness)
+        number_line_path = visualizer.create_thickness_number_line(self, analysis_results, actual_thickness)
         comparison_chart_path = visualizer.create_comparison_chart(analysis_results, actual_thickness)
         
         return {

@@ -1,0 +1,25 @@
+
+TMIN SUMMARY REPORT
+===================
+
+Pipe Specifications:
+NPS: 3/4" Schedule 160
+Pressure Class: 300
+Metallurgy: CS A106 GR B
+Design Pressure: 225.0 psi
+
+Thickness Analysis:
+Actual Thickness: 0.0840 inches
+Limiting Thickness: 0.0500 inches
+Limiting Factor: structural
+
+Status: ADEQUATE
+
+Key Findings:
+• All thickness requirements met
+
+Recommendations:
+• Continue with normal inspection schedule
+• Estimated remaining life: 169.0 years
+
+Report Generated: 2025-07-15 21:27:43
