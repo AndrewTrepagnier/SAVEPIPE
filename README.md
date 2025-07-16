@@ -45,31 +45,9 @@ This analytical approach transforms the complex retirement decision into a clear
 
 TMIN is a sophisticated pipe thickness analysis tool designed for mechanical integrity engineers, reliability specialists, and operations teams in the oil and gas industry. It provides automated analysis of pipe wall thickness against multiple design criteria and generates professional reports with actionable recommendations.
 
-## Key Features
+## Auto-generated Visualization and Results
 
-### 🔍 **Comprehensive Analysis**
-- **Pressure Design Analysis**: ASME B31.1 pressure design calculations
-- **Structural Analysis**: API 574 structural minimum thickness requirements
-- **Retirement Limit Assessment**: Multiple retirement limit criteria evaluation
-- **Corrosion Life Prediction**: Remaining service life calculations based on corrosion rates
 
-### 📊 **Professional Reporting**
-- **Detailed Text Reports**: Comprehensive analysis with recommendations
-- **Summary Reports**: Quick overview for management review
-- **Visualizations**: Number line plots and comparison charts
-- **Automatic File Organization**: Date-stamped files in organized Reports folder
-
-### 🛡️ **Safety & Compliance**
-- **Multiple Standards**: ASME B31.1, API 574, and custom Table 5 retirement limits
-- **Risk Assessment**: Automatic identification of critical conditions
-- **Recommendations**: Actionable guidance based on analysis results
-- **Documentation**: Professional reports for regulatory compliance
-
-### ⚡ **Engineering Decision Support**
-- **Limiting Factor Identification**: Determines controlling design criteria
-- **Adequacy Assessment**: Clear pass/fail status for each criterion
-- **Life Span Prediction**: Corrosion-based remaining life estimates
-- **Immediate Action Alerts**: Critical condition notifications
 
 ## Install
 
@@ -88,6 +66,22 @@ pip install tmin
 
 ---
 
+## How It Works: Time-Based Corrosion Adjustment
+
+TMIN allows you to supply both the measured thickness and the year that measurement was taken. If you also provide a corrosion rate (in mpy), TMIN will automatically calculate the present-day (current) thickness by accounting for the metal loss since the last inspection.
+
+**Calculation:**
+
+```
+present_day_thickness = measured_thickness - (corrosion_rate × years_elapsed × 0.001)
+```
+- `measured_thickness`: The thickness measured during the last inspection (inches)
+- `corrosion_rate`: Corrosion rate in mils per year (mpy)
+- `years_elapsed`: Years since the inspection (current year - inspection year)
+- `0.001`: Conversion factor from mpy to inches per year
+
+If you do not supply an inspection year or corrosion rate, TMIN will use the measured thickness as the present-day thickness.
+
 ## Example
 
 ### Run as a CLI Tool
@@ -95,7 +89,12 @@ pip install tmin
 ```bash
 tmin
 ```
-Follow the prompts to analyze your pipe and generate reports.
+Follow the prompts to analyze your pipe and generate reports. You will be asked for:
+- Measured thickness during inspection (inches)
+- Year when thickness was measured (e.g., 2022)
+- Corrosion rate (mpy, optional)
+
+TMIN will calculate the present-day thickness and use it for all analysis and reporting.
 
 ### Or Use as a Python API
 
@@ -112,16 +111,17 @@ pipe = PIPE(
     corrosion_rate=10.0  # mpy (optional)
 )
 
-# Perform comprehensive analysis
-results = pipe.analyze_pipe_thickness(actual_thickness=0.060)
+# Analyze with time-based corrosion adjustment
+results = pipe.analyze_pipe_thickness(measured_thickness=0.060, year_inspected=2023)
+print("Present-day thickness:", results["actual_thickness"])
 
 # Generate full report with visualizations
-report_files = pipe.generate_full_report(actual_thickness=0.060)
+report_files = pipe.generate_full_report(measured_thickness=0.060, year_inspected=2023)
 ```
 
 ### Example Output of Reports and Visuals
 
-An folder called "Reports" will be automatically generated in the user's root directory and populated with .txt reports and helpful visualizations of the TMIN analysis.
+A folder called "Reports" will be automatically generated in the user's root directory and populated with .txt reports and helpful visualizations of the TMIN analysis. The report will show both the measured thickness, the inspection year, and the calculated present-day thickness.
 
 ### Pressure Design (ASME B31.1)
 - Calculates minimum wall thickness for pressure containment
@@ -147,7 +147,7 @@ An folder called "Reports" will be automatically generated in the user's root di
 
 When you run a full analysis, TMIN automatically creates a `Reports/` folder and generates:
 
-### �� **Text Reports**
+### 📄 **Text Reports**
 - **Full Report**: Comprehensive analysis with all details and recommendations
 - **Summary Report**: Executive summary for management review
 
@@ -187,11 +187,12 @@ Reports/
 Run the comprehensive test suite:
 
 ```bash
-python -m tests.test_core
+python -m pytest tests/test_core.py -v
 ```
 
 The test suite includes:
 - Basic analysis functionality
+- Time-based corrosion adjustment
 - Report generation
 - Multiple pipe scenarios
 - Corrosion rate analysis
