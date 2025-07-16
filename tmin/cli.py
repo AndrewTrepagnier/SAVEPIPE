@@ -1,6 +1,10 @@
+#!/usr/bin/env python3
+"""
+Command Line Interface for TMIN Package
+"""
+
+from .core import PIPE
 import sys
-from savepipe.core import SAVEPIPE
-import textwrap
 
 def main():
     print("\nSAVEPIPE CLI - Pipe Thickness Analysis\n" + "="*40)
@@ -23,43 +27,52 @@ def main():
         "- The developers and distributors of SAVEPIPE accept no liability for any damages or losses resulting from the use or misuse of this software.\n"
     )
     print(textwrap.fill(disclaimer, width=80, replace_whitespace=False, subsequent_indent='    '))
+    """Main CLI function"""
+    print("TMIN - Pipe Thickness Analysis Tool")
+    print("=" * 40)
     try:
+        # Get pipe parameters from user
         schedule = input("Enter pipe schedule (10, 40, 80, 120, 160): ").strip()
-        nps = input("Enter nominal pipe size (e.g., 2, 3/4, 1-1/2): ").strip()
-        pressure = float(input("Enter design pressure (psi): ").strip())
-        pressure_class = int(input("Enter pressure class (150, 300, 600, 900, 1500, 2500): ").strip())
+        nps = input("Enter nominal pipe size (e.g., '2', '3/4'): ").strip()
+        pressure = float(input("Enter design pressure (psi): "))
+        pressure_class = int(input("Enter pressure class (150, 300, 600, 900, 1500, 2500): "))
         metallurgy = input("Enter metallurgy (CS A106 GR B, SS 316/316S, SS 304, Inconel 625): ").strip()
-        actual_thickness = float(input("Enter actual measured thickness (inches): ").strip())
-        corrosion_rate = input("Enter corrosion rate (mpy, optional): ").strip()
-        corrosion_rate = float(corrosion_rate) if corrosion_rate else None
-    except Exception as e:
-        print(f"Input error: {e}")
-        sys.exit(1)
-
-    pipe = SAVEPIPE(
-        schedule=schedule,
-        nps=nps,
-        pressure=pressure,
-        pressure_class=pressure_class,
-        metallurgy=metallurgy,
-        corrosion_rate=corrosion_rate
-    )
-
-    print("\nRunning analysis...")
-    results = pipe.analyze_pipe_thickness(actual_thickness=actual_thickness)
-    print("\nAnalysis Results:")
-    for k, v in results.items():
-        print(f"  {k}: {v}")
-
-    gen_report = input("\nGenerate full report and visualizations? (y/n): ").strip().lower()
-    if gen_report == 'y':
-        files = pipe.generate_full_report(actual_thickness=actual_thickness)
-        print("\nGenerated files:")
-        for file_type, filepath in files.items():
+        
+        # Optional parameters
+        corrosion_rate_input = input("Enter corrosion rate in mpy (optional, press Enter to skip): ").strip()
+        corrosion_rate = float(corrosion_rate_input) if corrosion_rate_input else None
+        
+        default_retirement_limit_input = input("Enter default retirement limit in inches (optional, press Enter to skip): ").strip()
+        default_retirement_limit = float(default_retirement_limit_input) if default_retirement_limit_input else None
+        
+        actual_thickness = float(input("Enter actual measured thickness (inches): "))
+        
+        # Create pipe instance
+        pipe = PIPE(
+            schedule=schedule,
+            nps=nps,
+            pressure=pressure,
+            pressure_class=pressure_class,
+            metallurgy=metallurgy,
+            corrosion_rate=corrosion_rate,
+            default_retirement_limit=default_retirement_limit
+        )
+        
+        # Generate full report
+        print("\nGenerating analysis and reports...")
+        report_files = pipe.generate_full_report(actual_thickness)
+        
+        print("\nAnalysis complete! Generated files:")
+        for file_type, file_path in report_files.items():
             if file_type != "analysis_results":
-                print(f"  {file_type}: {filepath}")
-        print("\nAll files saved in the Reports/ folder.")
-    print("\nDone.")
+                print(f"  {file_type}: {file_path}")
+        
+    except ValueError as e:
+        print(f"Error: Invalid input - {e}")
+        sys.exit(1)
+    except Exception as e:
+        print(f"Error: {e}")
+        sys.exit(1)
 
 if __name__ == "__main__":
     main() 

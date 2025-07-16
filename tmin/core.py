@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 
 @dataclass
-class SAVEPIPE:
+class PIPE:
 
     #########################################
     # Initialized Arguments with Typing Hints
@@ -167,11 +167,11 @@ class SAVEPIPE:
     #     else:
     #         status = "Below RL - Consider Retirement"
     #     return {
-    #         "status": status,
-    #         "retirement_limit": RL,
-    #         "actual_thickness": actual_thickness,
-    #         "percent_remaining": percent_remaining
-    #     }
+    #             "status": status,
+    #             "retirement_limit": RL,
+    #             "actual_thickness": actual_thickness,
+    #             "percent_remaining": percent_remaining
+    #         }
 
     # def compare_thickness(self, actual_thickness, temp_f=1000, joint_type='Seamless'):
     #     """
@@ -185,16 +185,16 @@ class SAVEPIPE:
     #     # Check retirement limit
     #     rl_status = self.check_RL_status(actual_thickness)
     #     return {
-    #         'actual_thickness': actual_thickness,
-    #         'calculated_tmin': tmin,
-    #         'tmin_excess': tmin_excess,
-    #         'tmin_percent_excess': tmin_percent_excess,
-    #         'rl_status': rl_status['status'],
-    #         'retirement_limit': rl_status['retirement_limit'],
-    #         'rl_percent_remaining': rl_status['percent_remaining'],
-    #         'pressure_design_adequate': tmin_excess > 0,
-    #         'rl_adequate': actual_thickness >= rl_status['retirement_limit'] if rl_status['retirement_limit'] else None
-    #     }
+    #             'actual_thickness': actual_thickness,
+    #             'calculated_tmin': tmin,
+    #             'tmin_excess': tmin_excess,
+    #             'tmin_percent_excess': tmin_percent_excess,
+    #             'rl_status': rl_status['status'],
+    #             'retirement_limit': rl_status['retirement_limit'],
+    #             'rl_percent_remaining': rl_status['percent_remaining'],
+    #             'pressure_design_adequate': tmin_excess > 0,
+    #             'rl_adequate': actual_thickness >= rl_status['retirement_limit'] if rl_status['retirement_limit'] else None
+    #         }
 
     #####################################################################################
     # ANALYSIS

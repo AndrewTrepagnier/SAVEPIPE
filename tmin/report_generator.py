@@ -9,8 +9,8 @@ class ReportGenerator:
     
     def __init__(self):
         self.report_template = """
-SAVEPIPE - PIPE THICKNESS ANALYSIS REPORT
-=========================================
+TMIN - PIPE THICKNESS ANALYSIS REPORT
+=====================================
 
 Report Generated: {timestamp}
 Analysis ID: {analysis_id}
@@ -80,7 +80,7 @@ NOTES
         Generate a comprehensive text report
         
         Args:
-            pipe_instance: SAVEPIPE instance
+            pipe_instance: PIPE instance
             analysis_results: Results from analyze_pipe_thickness method
             actual_thickness: The actual measured thickness
             filename: Optional filename to save the report (without extension)
@@ -90,7 +90,7 @@ NOTES
         """
         
         # Generate analysis ID
-        analysis_id = f"SAVEPIPE_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+        analysis_id = f"TMIN_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
         
         # Determine adequacy status
         pressure_adequate = "ADEQUATE" if actual_thickness >= analysis_results.get('tmin_pressure', 0) else "INADEQUATE"
@@ -152,7 +152,7 @@ NOTES
         
         # Save the report
         if filename is None:
-            filename = f"SAVEPIPE_report_{analysis_id}"
+            filename = f"TMIN_report_{analysis_id}"
         
         filepath = self._get_filename_with_date(f"{filename}.txt")
         with open(filepath, 'w') as f:
@@ -225,7 +225,7 @@ NOTES
         Generate a brief summary report
         
         Args:
-            pipe_instance: SAVEPIPE instance
+            pipe_instance: PIPE instance
             analysis_results: Results from analyze_pipe_thickness method
             actual_thickness: The actual measured thickness
             filename: Optional filename to save the report (without extension)
@@ -248,39 +248,85 @@ NOTES
         print(f"DEBUG: tmin_pressure={tmin_pressure}, tmin_structural={tmin_structural}, api574_RL={api574_RL}, retirement_limit={retirement_limit}")
         print(f"DEBUG: thickness_values for min/max: {thickness_values}")
 
-        if actual_thickness < min(thickness_values):
-            status = "CRITICAL - IMMEDIATE ACTION REQUIRED"
-        elif actual_thickness < api574_RL:
-            status = "RETIREMENT RECOMMENDED"
-        elif actual_thickness < max([tmin_pressure, tmin_structural]):
-            status = "MONITORING REQUIRED"
-        else:
-            status = "ADEQUATE"
+        # Find the maximum thickness requirement (most conservative)
+        max_thickness = max(thickness_values) if thickness_values else 0
         
-        retirement_limit_str = f"{retirement_limit:.4f}" if retirement_limit is not None else "N/A"
-        summary_content = f"""
-SAVEPIPE SUMMARY REPORT
-=======================
+        # Determine overall status
+        if actual_thickness >= max_thickness:
+            status = "ADEQUATE"
+        else:
+            status = "INADEQUATE"
+        
+        # Generate summary content
+        summary_template = """
+TMIN SUMMARY REPORT
+===================
 
-Pipe: NPS {pipe_instance.nps}, Schedule {pipe_instance.schedule}, Class {pipe_instance.pressure_class}
-Metallurgy: {pipe_instance.metallurgy}
+Pipe Specifications:
+NPS: {nps}" Schedule {schedule}
+Pressure Class: {pressure_class}
+Metallurgy: {metallurgy}
+Design Pressure: {pressure} psi
+
+Thickness Analysis:
 Actual Thickness: {actual_thickness:.4f} inches
+Limiting Thickness: {limiting_thickness:.4f} inches
+Limiting Factor: {limiting_type}
 
-OVERALL STATUS: {status}
+Status: {status}
 
-Key Values:
-- Pressure Design Min: {tmin_pressure:.4f} inches
-- Structural Min: {tmin_structural:.4f} inches  
-- API 574 RL: {api574_RL:.4f} inches
-- Retirement Limit: {retirement_limit_str} inches
-- Limiting Factor: {analysis_results.get('limiting_type', 'Unknown')}
+Key Findings:
+{findings}
 
-Generated: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
+Recommendations:
+{recommendations}
+
+Report Generated: {timestamp}
 """
         
-        # Save the summary
+        # Generate findings
+        findings = []
+        if actual_thickness < tmin_pressure:
+            findings.append("• Below pressure design minimum")
+        if actual_thickness < tmin_structural:
+            findings.append("• Below structural minimum")
+        if api574_RL and actual_thickness < api574_RL:
+            findings.append("• Below API 574 retirement limit")
+        if retirement_limit and actual_thickness < retirement_limit:
+            findings.append("• Below retirement limit")
+        
+        if not findings:
+            findings.append("• All thickness requirements met")
+        
+        # Generate recommendations
+        recommendations = []
+        if status == "INADEQUATE":
+            recommendations.append("• Immediate action required")
+            recommendations.append("• Consider pipe replacement or pressure reduction")
+        else:
+            recommendations.append("• Continue with normal inspection schedule")
+            if analysis_results.get('life_span'):
+                recommendations.append(f"• Estimated remaining life: {analysis_results['life_span']:.1f} years")
+        
+        # Format summary
+        summary_content = summary_template.format(
+            nps=pipe_instance.nps,
+            schedule=pipe_instance.schedule,
+            pressure_class=pipe_instance.pressure_class,
+            metallurgy=pipe_instance.metallurgy,
+            pressure=pipe_instance.pressure,
+            actual_thickness=actual_thickness,
+            limiting_thickness=analysis_results.get('limiting_thickness', 0),
+            limiting_type=analysis_results.get('limiting_type', 'Unknown'),
+            status=status,
+            findings="\n".join(findings),
+            recommendations="\n".join(recommendations),
+            timestamp=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        )
+        
+        # Save summary report
         if filename is None:
-            filename = f"SAVEPIPE_summary_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+            filename = f"TMIN_summary_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
         
         filepath = self._get_filename_with_date(f"{filename}.txt")
         with open(filepath, 'w') as f:
