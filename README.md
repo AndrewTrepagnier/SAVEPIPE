@@ -47,8 +47,16 @@ TMIN is a sophisticated pipe thickness analysis tool designed for mechanical int
 
 ### Example Output of Reports and Visuals
 
-A folder called "Reports" will be automatically generated in the user's root directory and populated with .txt reports and helpful visualizations of the TMIN analysis. The report will show both the measured thickness, the inspection year, and the calculated present-day thickness. This is all auto-generated using the `generate_full_report` function.
+A folder called "Reports" will be automatically generated in the user's root directory and populated with .txt reports and helpful visualizations of the TMIN analysis. The report will show both the measured thickness, the inspection year, and the calculated present-day thickness. 
 
+All files are automatically named with timestamps:
+```
+Reports/
+├── 20250712_181928_TMIN_report_TMIN_20250712_181928.txt
+├── 20250712_181928_TMIN_summary_20250712_181928.txt
+├── 20250712_181928_thickness_analysis_number_line.png
+└── 20250712_181928_thickness_comparison_chart.png
+```
 
 <img width="3477" height="1649" alt="20250714_191322_thickness_analysis_number_line" src="https://github.com/user-attachments/assets/4bfb98dc-ce59-4c43-b68d-8b56e404e05e" />
 
@@ -128,10 +136,7 @@ print("Present-day thickness:", results["actual_thickness"])
 # Generate full report with visualizations
 report_files = pipe.generate_full_report(measured_thickness=0.060, year_inspected=2023)
 ```
-
-### Example Output of Reports and Visuals
-
-A folder called "Reports" will be automatically generated in the user's root directory and populated with .txt reports and helpful visualizations of the TMIN analysis. The report will show both the measured thickness, the inspection year, and the calculated present-day thickness.
+## Industrial Standards Featured
 
 ### Pressure Design (ASME B31.1)
 - Calculates minimum wall thickness for pressure containment
@@ -153,27 +158,7 @@ A folder called "Reports" will be automatically generated in the user's root dir
 - **Corrosion Allowance**: Thickness above retirement limits
 - **Monitoring Recommendations**: Inspection frequency guidance
 
-## Output Files
 
-When you run a full analysis, TMIN automatically creates a `Reports/` folder and generates:
-
-### 📄 **Text Reports**
-- **Full Report**: Comprehensive analysis with all details and recommendations
-- **Summary Report**: Executive summary for management review
-
-### 📊 **Visualizations**
-- **Number Line Plot**: Shows all thickness values on a scale for easy comparison
-- **Comparison Chart**: Bar chart highlighting the limiting factor
-
-### 📁 **File Naming**
-All files are automatically named with timestamps:
-```
-Reports/
-├── 20250712_181928_TMIN_report_TMIN_20250712_181928.txt
-├── 20250712_181928_TMIN_summary_20250712_181928.txt
-├── 20250712_181928_thickness_analysis_number_line.png
-└── 20250712_181928_thickness_comparison_chart.png
-```
 
 ## Supported Pipe Specifications
 
@@ -219,7 +204,7 @@ This project is designed for the mechanical integrity engineering community. Con
 
 ## License
 
-[Add your license information here]
+MIT License
 
 ## Disclaimer
 
@@ -227,11 +212,9 @@ TMIN is a decision support tool designed to assist qualified engineers in making
 
 ## Contact
 
-For questions, suggestions, or contributions, please contact andrew[dot]trepagnier[at]icloud.com
-
+For questions, suggestions, or contributions, please contact:
+andrew[dot]trepagnier[at]icloud[dot]com
 ---
-
-**TMIN** - Making critical infrastructure decisions safer and more informed.
 
 
 
