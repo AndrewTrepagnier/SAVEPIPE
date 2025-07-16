@@ -45,13 +45,16 @@ This analytical approach transforms the complex retirement decision into a clear
 
 TMIN is a sophisticated pipe thickness analysis tool designed for mechanical integrity engineers, reliability specialists, and operations teams in the oil and gas industry. It provides automated analysis of pipe wall thickness against multiple design criteria and generates professional reports with actionable recommendations.
 
-## Auto-generated Visualization and Results
+### Example Output of Reports and Visuals
 
-Visualizations  of where present-day thicknesses measurements lie compared to the nominal pipe wall can be generated using the `generate_full_report` function. 
+A folder called "Reports" will be automatically generated in the user's root directory and populated with .txt reports and helpful visualizations of the TMIN analysis. The report will show both the measured thickness, the inspection year, and the calculated present-day thickness. This is all auto-generated using the `generate_full_report` function.
+
 
 <img width="3477" height="1649" alt="20250714_191322_thickness_analysis_number_line" src="https://github.com/user-attachments/assets/4bfb98dc-ce59-4c43-b68d-8b56e404e05e" />
 
+
 The comparison chart displays a bar chart comparing all relevant thickness values (measured, pressure design minimum, structural minimum, and retirement limits) to quickly identify which factor controls the pipe design.
+
 
 <img width="2968" height="1769" alt="20250714_191322_thickness_comparison_chart" src="https://github.com/user-attachments/assets/815ab487-7f7d-4448-ab64-525366debbd2" />
 
