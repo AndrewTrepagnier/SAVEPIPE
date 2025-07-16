@@ -25,9 +25,11 @@ Design Pressure: {pressure} psi
 Pipe Configuration: {pipe_config}
 Corrosion Rate: {corrosion_rate} mpy
 
-MEASURED THICKNESS
-------------------
-Actual Thickness: {actual_thickness:.4f} inches
+THICKNESS MEASUREMENT DATA
+--------------------------
+Measured Thickness: {measured_thickness:.4f} inches
+Inspection Year: {year_inspected}
+Present-Day Thickness: {actual_thickness:.4f} inches
 
 DESIGN REQUIREMENTS
 -------------------
@@ -132,6 +134,8 @@ NOTES
             pressure=pipe_instance.pressure,
             pipe_config=pipe_instance.pipe_config,
             corrosion_rate=pipe_instance.corrosion_rate if pipe_instance.corrosion_rate else "Not specified",
+            measured_thickness=analysis_results.get('measured_thickness', 'N/A'),
+            year_inspected=analysis_results.get('year_inspected', 'N/A'),
             actual_thickness=actual_thickness,
             tmin_pressure=analysis_results.get('tmin_pressure', 0),
             tmin_structural=analysis_results.get('tmin_structural', 0),

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Test script for SAVEPIPE package
+Test script for TMIN package
 Contains usage examples and test cases for pipe thickness analysis
 """
 
@@ -25,13 +25,37 @@ def test_basic_pipe_analysis():
         default_retirement_limit=0.050
     )
     
-    results = pipe.analyze_pipe_thickness(actual_thickness=0.060)
+    results = pipe.analyze_pipe_thickness(measured_thickness=0.060)
     
     assert results is not None
     assert "tmin_pressure" in results
     assert "tmin_structural" in results
     assert "limiting_thickness" in results
     assert "limiting_type" in results
+    assert "measured_thickness" in results
+    assert "actual_thickness" in results
+
+def test_time_based_corrosion_calculation():
+    """Test time-based corrosion calculation with inspection year"""
+    pipe = PIPE(
+        schedule="40",
+        nps="2",
+        pressure=50.0,
+        pressure_class=150,
+        metallurgy="CS A106 GR B",
+        corrosion_rate=10.0,  # 10 mpy = 0.010 inches per year
+        default_retirement_limit=0.050
+    )
+    
+    # Test with inspection 2 years ago
+    results = pipe.analyze_pipe_thickness(measured_thickness=0.060, year_inspected=2023)
+    
+    assert results is not None
+    assert results["measured_thickness"] == 0.060
+    assert results["year_inspected"] == 2023
+    # Corrosion loss should be 0.010 * 2 = 0.020 inches
+    # Present-day thickness should be 0.060 - 0.020 = 0.040 inches
+    assert abs(results["actual_thickness"] - 0.040) < 0.001
 
 def test_pipe_without_corrosion_rate():
     """Test pipe analysis without corrosion rate"""
@@ -44,10 +68,11 @@ def test_pipe_without_corrosion_rate():
         default_retirement_limit=0.050
     )
     
-    results = pipe.analyze_pipe_thickness(actual_thickness=0.060)
+    results = pipe.analyze_pipe_thickness(measured_thickness=0.060, year_inspected=2023)
     
     assert results is not None
     assert results["life_span"] is None  # Should be None when no corrosion rate
+    assert results["actual_thickness"] == 0.060  # Should use measured thickness as-is
 
 def test_pipe_without_retirement_limit():
     """Test pipe analysis without default retirement limit"""
@@ -60,7 +85,7 @@ def test_pipe_without_retirement_limit():
         corrosion_rate=10.0
     )
     
-    results = pipe.analyze_pipe_thickness(actual_thickness=0.060)
+    results = pipe.analyze_pipe_thickness(measured_thickness=0.060)
     
     assert results is not None
     assert results["default_retirement_limit"] is None
@@ -78,8 +103,8 @@ def test_edge_case_thickness_below_api574():
         default_retirement_limit=0.050
     )
     
-    # Use a very low actual thickness that should be below API 574 limit
-    results = pipe.analyze_pipe_thickness(actual_thickness=0.030)
+    # Use a very low measured thickness that should result in present-day thickness below API 574 limit
+    results = pipe.analyze_pipe_thickness(measured_thickness=0.030, year_inspected=2023)
     
     assert results is not None
     assert results["above_api574RL"] is None  # Should be None when below limit
@@ -96,7 +121,7 @@ def test_practice_scenario():
         default_retirement_limit=0.080
     )
     
-    results = pipe.analyze_pipe_thickness(actual_thickness=0.095)
+    results = pipe.analyze_pipe_thickness(measured_thickness=0.095, year_inspected=2022)
     
     assert results is not None
     assert results["tmin_pressure"] > 0
@@ -109,6 +134,20 @@ def test_practice_scenario():
         assert results["above_api574RL"] > 0
         assert results["life_span"] is not None
         assert results["life_span"] > 0
+
+def test_future_inspection_year_error():
+    """Test that future inspection years raise an error"""
+    pipe = PIPE(
+        schedule="40",
+        nps="2",
+        pressure=50.0,
+        pressure_class=150,
+        metallurgy="CS A106 GR B",
+        corrosion_rate=10.0
+    )
+    
+    with pytest.raises(ValueError, match="cannot be in the future"):
+        pipe.analyze_pipe_thickness(measured_thickness=0.060, year_inspected=2030)
 
 if __name__ == "__main__":
     pytest.main([__file__])
