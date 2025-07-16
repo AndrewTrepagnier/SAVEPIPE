@@ -47,6 +47,13 @@ TMIN is a sophisticated pipe thickness analysis tool designed for mechanical int
 
 ## Auto-generated Visualization and Results
 
+Visualizations  of where present-day thicknesses measurements lie compared to the nominal pipe wall can be generated using the `generate_full_report` function. 
+
+<img width="3477" height="1649" alt="20250714_191322_thickness_analysis_number_line" src="https://github.com/user-attachments/assets/4bfb98dc-ce59-4c43-b68d-8b56e404e05e" />
+
+The comparison chart displays a bar chart comparing all relevant thickness values (measured, pressure design minimum, structural minimum, and retirement limits) to quickly identify which factor controls the pipe design.
+
+<img width="2968" height="1769" alt="20250714_191322_thickness_comparison_chart" src="https://github.com/user-attachments/assets/815ab487-7f7d-4448-ab64-525366debbd2" />
 
 
 ## Install
