@@ -213,7 +213,7 @@ class PIPE:
     # ANALYSIS
     ####################################################################################
 
-    def analyze_pipe_thickness(self, measured_thickness: float, year_inspected: Optional[int] = None, joint_type='Seamless'):
+    def analysis(self, measured_thickness: float, year_inspected: Optional[int] = None, joint_type='Seamless'):
         """
         Analyze and compare all relevant thicknesses: pressure, structural, Table 5, and proposed retirement.
         
@@ -329,7 +329,7 @@ class PIPE:
         from .visualization import ThicknessVisualizer
         
         # Perform analysis
-        analysis_results = self.analyze_pipe_thickness(measured_thickness, year_inspected, joint_type)
+        analysis_results = self.analysis(measured_thickness, year_inspected, joint_type)
         
         # Get the present-day actual thickness from results
         actual_thickness = analysis_results['actual_thickness']

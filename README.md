@@ -112,7 +112,7 @@ pipe = PIPE(
 )
 
 # Analyze with time-based corrosion adjustment
-results = pipe.analyze_pipe_thickness(measured_thickness=0.060, year_inspected=2023)
+results = pipe.analysis(measured_thickness=0.060, year_inspected=2023)
 print("Present-day thickness:", results["actual_thickness"])
 
 # Generate full report with visualizations
