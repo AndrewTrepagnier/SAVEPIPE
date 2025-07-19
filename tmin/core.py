@@ -2,7 +2,8 @@ from .asmetables.od_table import trueOD_40, trueOD_80, trueOD_10, trueOD_120, tr
 from .asmetables.wsrf import WSRF
 from .asmetables.y_coeff import ferritic_steels_y, austenitic_steels_y, other_metals_y, nickel_alloy_N06690_y, nickel_alloys_N06617_N08800_N08810_N08825_y, cast_iron_y
 from .asmetables.yield_stress import S_, E_
-from .asmetables.api_574 import API574_CS_400F, API574_SS_400F
+from .asmetables.api_574_2025 import API574_CS_400F, API574_SS_400F
+from .asmetables.api_574_2009 import API574_2009_TABLE_6
 
 import numpy as np
 from dataclasses import dataclass
@@ -22,12 +23,12 @@ class PIPE:
     nps: str  # Nominal pipe size (e.g., '2', '3/4', '1-1/2')
     pressure: float  # Design pressure (psi)
     pressure_class: Literal[150, 300, 600, 900, 1500, 2500]
-    metallurgy: Literal["CS A106 GR B", "SS 316/316S", "SS 304", "Inconel 625"]
-    design_temp: Literal["<900" ,900, 950, 1000, 1050, 1100, 1150, 1200, 1250] = 900 
-    pipe_config: Literal["straight", "bend-90", "bend-45", "tee", "elbow"] = "straight"  # Pipe configuration
+    metallurgy: Literal["CS A106 GR B", "SS 316/316S", "SS 304", "Inconel 625"] #TODO: Add 5% Cr Metallurgy
+    design_temp: Literal["<900" ,900, 950, 1000, 1050, 1100, 1150, 1200, 1250, "1250+" ] = 900 
+    pipe_config: Literal["straight", "90LR - elbow", "45 LR - bend", "tee"] = "straight"  #TODO: Add elbow configuration logic
     corrosion_rate: Optional[float] = None #mpy 
     default_retirement_limit: Optional[float] = None
-    
+    API_table : Literal["2025", "2009"] = "2025"
 
     # Valid pipe types for reference
     VALID_PIPE_TYPES = ["straight", "bend-90", "bend-45", "tee", "elbow"]
@@ -47,6 +48,7 @@ class PIPE:
     E_ = E_
     API574_CS_400F = API574_CS_400F
     API574_SS_400F = API574_SS_400F
+    API574_2009_TABLE_6 = API574_2009_TABLE_6
 
     ##########################################
     # PARSE TABLES
@@ -182,9 +184,15 @@ class PIPE:
     
     def tmin_structural(self) -> float:
         """API 574 Table D.2"""
-        nps_key = self._convert_nps_to_float(self.nps)
-        min_structural = self.API574_CS_400F[nps_key][self.pressure_class] #Only have 500F CS 
-        return min_structural
+        if self.API_table == "2025": # API 574 2025 Standard
+            nps_key = self._convert_nps_to_float(self.nps)
+            min_structural = self.API574_CS_400F[nps_key][self.pressure_class] #Only have 500F CS 
+            return min_structural
+        
+        else: # API 574 2009 Standard
+            nps_key = self._convert_nps_to_float(self.nps)
+            min_structural = self.API574_2009_TABLE_6[nps_key]["default_minimum_structural_thickness"]
+            return min_structural
     
     def life_span(self, excess, corrosion_rate) -> float:
         return np.floor(self.mil_conv(excess)*corrosion_rate)

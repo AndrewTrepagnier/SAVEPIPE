@@ -14,7 +14,8 @@ tmin.egg-info/entry_points.txt
 tmin.egg-info/requires.txt
 tmin.egg-info/top_level.txt
 tmin/asmetables/__init__.py
-tmin/asmetables/api_574.py
+tmin/asmetables/api_574_2009.py
+tmin/asmetables/api_574_2025.py
 tmin/asmetables/id_table.py
 tmin/asmetables/od_table.py
 tmin/asmetables/wsrf.py

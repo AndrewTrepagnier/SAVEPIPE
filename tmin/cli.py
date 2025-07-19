@@ -38,18 +38,20 @@ def main():
         metallurgy = input("Enter metallurgy (CS A106 GR B, SS 316/316S, SS 304, Inconel 625): ").strip()
         
         # Optional parameters
-        corrosion_rate_input = input("Enter corrosion rate in mpy (optional, press Enter to skip): ").strip()
+        corrosion_rate_input = input("Enter corrosion rate in MPY (optional, press Enter to skip): ").strip()
         corrosion_rate = float(corrosion_rate_input) if corrosion_rate_input else None
         
-        default_retirement_limit_input = input("Enter default retirement limit in inches (optional, press Enter to skip): ").strip()
+        default_retirement_limit_input = input("If there is a company issued default retirement limit for this pipe, enter here in inches (optional, press Enter to skip): ").strip()
         default_retirement_limit = float(default_retirement_limit_input) if default_retirement_limit_input else None
         
         measured_thickness = float(input("Enter measured thickness during inspection (inches): "))
-        
+
         # Get inspection year for time-based corrosion calculation
-        year_inspected_input = input("Enter year when thickness was measured (e.g., 2020, optional, press Enter to skip): ").strip()
+        year_inspected_input = input("Enter year when thickness was measured (e.g., 2020, optional, press Enter to skip, the present year is assumed if skipped): ").strip()
         year_inspected = int(year_inspected_input) if year_inspected_input else None
         
+        API_table = input("Enter which ASME B31.3 edition you would like to use (e.g. 2024 (latest), 2009):").strip()
+
         # Create pipe instance
         pipe = PIPE(
             schedule=schedule,
@@ -58,7 +60,8 @@ def main():
             pressure_class=pressure_class,
             metallurgy=metallurgy,
             corrosion_rate=corrosion_rate,
-            default_retirement_limit=default_retirement_limit
+            default_retirement_limit=default_retirement_limit,
+            API_table=API_table
         )
         
         # Generate full report
