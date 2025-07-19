@@ -30,8 +30,8 @@ def test_basic_pipe_analysis():
     assert results is not None
     assert "tmin_pressure" in results
     assert "tmin_structural" in results
-    assert "limiting_thickness" in results
-    assert "limiting_type" in results
+    assert "governing_thickness" in results
+    assert "governing_type" in results
     assert "measured_thickness" in results
     assert "actual_thickness" in results
 
@@ -126,8 +126,8 @@ def test_practice_scenario():
     assert results is not None
     assert results["tmin_pressure"] > 0
     assert results["tmin_structural"] > 0
-    assert results["limiting_thickness"] > 0
-    assert results["limiting_type"] in ["pressure", "structural"]
+    assert results["governing_thickness"] > 0
+    assert results["governing_type"] in ["pressure", "structural"]
     
     # Check that we have some corrosion allowance if above API 574 limit
     if results["above_api574RL"] is not None:

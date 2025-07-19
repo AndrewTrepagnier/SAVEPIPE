@@ -315,36 +315,44 @@ class PIPE:
 
         # Determines force contribution dictates the mechanical integrity and longevity of the pipe
         # The limiting thickness is the LARGER of pressure or structural tmin (i.e., the most conservative, requiring replacement at the highest threshold)
-        if limits["pressure"] > limits["structural"]:
-            limiting_thickness = limits["pressure"]
-            limiting_type = "pressure"
+        if limits["pressure"] >= limits["structural"]:
+            governing_thickness = limits["pressure"]
+            governing_type = "pressure"
+            
         else:
-            limiting_thickness = limits["structural"]
-            limiting_type = "structural"
+            governing_thickness = limits["structural"]
+            governing_type = "structural"
 
-        print(f"Limiting thickness type: {limiting_type} at {limiting_thickness}")
-
+        print("-----------GOVERNING THICKNESS REQUIREMENT ----------")
+        print(f"The pipe is {governing_type} thickness governed, pipe retirement is required at {governing_thickness} inches ({self.mil_conv(governing_thickness)} Mils)")
+        print("-----------------------------------------------------")
         # How much below the defaulted Retirement Limit
         if default_retirement_limit is not None:
             if default_retirement_limit - actual_thickness >= 0:
                 below_defaultRL = default_retirement_limit - actual_thickness
             else:
-                print(f"Actual Thickness is greater than default retirement limit by {actual_thickness - default_retirement_limit}")
+                print(f"The actual thickness is greater than default (company-specified) retirement limit by {actual_thickness - default_retirement_limit}")
                 below_defaultRL = None
         else:
             below_defaultRL = None
         
-        #How much above the API574 Retirement Limit Code
-        api574_value = self.which_API_table()
-        if api574_value is not None:
-            if api574_value < actual_thickness:
-                corosion_allowance = actual_thickness - api574_value
+        if governing_type == "structural":
+            
+            api574_value = self.which_API_table() #How much above the API574 Retirement Limit Code
+            if api574_value is not None:
+                if api574_value < actual_thickness:
+                    corosion_allowance = actual_thickness - api574_value
+                    print(f"There is {corosion_allowance} inches ({self.mil_conv(corosion_allowance)} Mils) of corrosion allowance remaining")
+                else:
+                    print(f"Actual Thickness is {api574_value - actual_thickness} inches below corresponding API 574 Structural Retirement Limit for {self.metallurgy}, Retirement Recommended, Fit For Service assessment is needed")
+                    corosion_allowance = None
             else:
-                print(f"Actual Thickness is {api574_value - actual_thickness} inches below corresponding API 574 Structural Retirement Limit for {self.metallurgy}, Retire Immediately - Fit For Service assessment is needed")
                 corosion_allowance = None
-        else:
-            corosion_allowance = None
-        
+
+        else: #  governing_type == "pressure"       Pressure Governed Requires Immediate Pipe Retirement
+
+            if governing_thickness >= actual_thickness:
+                print(f"Actual Thickness is {governing_thickness - actual_thickness} inches ({self.mil_conv(governing_thickness - actual_thickness)} Mils), Retire Pipe Immediately, miniumum pressure containing thickness is not satisfied") 
         
         return {
             "measured_thickness": measured_thickness,
@@ -357,8 +365,8 @@ class PIPE:
             "api574_RL": self.which_API_table(), #Same as new, proposed retirement limit.
             "above_api574RL": corosion_allowance,
             "life_span": self.life_span(corosion_allowance, self.corrosion_rate) if corosion_allowance is not None and self.corrosion_rate is not None else None,
-            "limiting_thickness": limiting_thickness,
-            "limiting_type": limiting_type,
+            "governing_thickness": governing_thickness,
+            "governing_type": governing_type,
         }
 
     def generate_full_report(self, measured_thickness: float, year_inspected: Optional[int] = None, joint_type='Seamless') -> Dict[str, str]:

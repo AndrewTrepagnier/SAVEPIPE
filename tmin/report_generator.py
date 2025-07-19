@@ -35,8 +35,8 @@ DESIGN REQUIREMENTS
 -------------------
 Pressure Design Minimum: {tmin_pressure:.4f} inches
 Structural Minimum (API 574): {tmin_structural:.4f} inches
-Limiting Thickness: {limiting_thickness:.4f} inches
-Limiting Factor: {limiting_type}
+Governing Thickness: {governing_thickness:.4f} inches
+Governing Factor: {governing_type}
 
 RETIREMENT LIMITS
 -----------------
@@ -139,8 +139,8 @@ NOTES
             actual_thickness=actual_thickness,
             tmin_pressure=analysis_results.get('tmin_pressure', 0),
             tmin_structural=analysis_results.get('tmin_structural', 0),
-            limiting_thickness=analysis_results.get('limiting_thickness', 0),
-            limiting_type=analysis_results.get('limiting_type', 'Unknown'),
+            governing_thickness=analysis_results.get('governing_thickness', 0),
+            governing_type=analysis_results.get('governing_type', 'Unknown'),
             retirement_limit=retirement_limit_str,
             api574_RL=api574_RL,
             pressure_adequate=pressure_adequate,
@@ -218,8 +218,8 @@ NOTES
         else:
             notes.append("• No corrosion rate specified - life span calculation not performed")
         
-        limiting_type = analysis_results.get('limiting_type', 'Unknown')
-        notes.append(f"• Limiting factor for design: {limiting_type}")
+        governing_type = analysis_results.get('governing_type', 'Unknown')
+        notes.append(f"• Governing factor for design: {governing_type}")
         
         return "\n".join(notes)
     
@@ -274,8 +274,8 @@ Design Pressure: {pressure} psi
 
 Thickness Analysis:
 Actual Thickness: {actual_thickness:.4f} inches
-Limiting Thickness: {limiting_thickness:.4f} inches
-Limiting Factor: {limiting_type}
+Governing Thickness: {governing_thickness:.4f} inches
+Governing Factor: {governing_type}
 
 Status: {status}
 
@@ -320,8 +320,8 @@ Report Generated: {timestamp}
             metallurgy=pipe_instance.metallurgy,
             pressure=pipe_instance.pressure,
             actual_thickness=actual_thickness,
-            limiting_thickness=analysis_results.get('limiting_thickness', 0),
-            limiting_type=analysis_results.get('limiting_type', 'Unknown'),
+            governing_thickness=analysis_results.get('governing_thickness', 0),
+            governing_type=analysis_results.get('governing_type', 'Unknown'),
             status=status,
             findings="\n".join(findings),
             recommendations="\n".join(recommendations),

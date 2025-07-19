@@ -157,11 +157,11 @@ class ThicknessVisualizer:
         tmin_structural = analysis_results.get('tmin_structural', 0)
         api574_RL = analysis_results.get('api574_RL', 0)
         retirement_limit = analysis_results.get('default_retirement_limit', None)
-        limiting_thickness = analysis_results.get('limiting_thickness', 0)
+        governing_thickness = analysis_results.get('governing_thickness', 0)
         
         # Prepare data for plotting
-        categories = ['Actual', 'Pressure t-min', 'Structural t-min', 'Limiting']
-        values = [actual_thickness, tmin_pressure, tmin_structural, limiting_thickness]
+        categories = ['Actual', 'Pressure t-min', 'Structural t-min', 'Governing']
+        values = [actual_thickness, tmin_pressure, tmin_structural, governing_thickness]
         colors = ['blue', 'red', 'orange', 'darkred']
         
         # Add API 574 RL if available
