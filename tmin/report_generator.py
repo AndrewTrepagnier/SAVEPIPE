@@ -4,7 +4,7 @@ import os
 
 class ReportGenerator:
     """
-    Generates detailed text reports for pipe thickness analysis
+    Generates text reports for pipe thickness analysis
     """
     
     def __init__(self):
@@ -79,7 +79,7 @@ NOTES
     def generate_report(self, pipe_instance, analysis_results: Dict[str, Any], 
                        actual_thickness: float, filename: Optional[str] = None) -> str:
         """
-        Generate a comprehensive text report
+        Generate a text report
         
         Args:
             pipe_instance: PIPE instance

@@ -4,6 +4,7 @@ from .asmetables.y_coeff import ferritic_steels_y, austenitic_steels_y, other_me
 from .asmetables.yield_stress import S_, E_
 from .asmetables.api_574_2025 import API574_CS_400F, API574_SS_400F
 from .asmetables.api_574_2009 import API574_2009_TABLE_6
+from .asmetables.ANSI_radii import ANSI_radii
 
 import numpy as np
 from dataclasses import dataclass
@@ -15,28 +16,20 @@ from datetime import datetime
 @dataclass
 class PIPE:
 
-    #########################################
-    # Initialized Arguments with Typing Hints
-    #########################################
-    #run: str  
     schedule: str  # Pipe schedule (10, 40, 80, 120, 160)
     nps: str  # Nominal pipe size (e.g., '2', '3/4', '1-1/2')
     pressure: float  # Design pressure (psi)
     pressure_class: Literal[150, 300, 600, 900, 1500, 2500]
-    metallurgy: Literal["CS A106 GR B", "SS 316/316S", "SS 304", "Inconel 625"] #TODO: Add 5% Cr Metallurgy
+    metallurgy: Literal["CS A106 GR B", "SS 316/316S", "SS 304", "Inconel 625"] 
     design_temp: Literal["<900" ,900, 950, 1000, 1050, 1100, 1150, 1200, 1250, "1250+" ] = 900 
-    pipe_config: Literal["straight", "90LR - elbow", "45 LR - bend", "tee"] = "straight"  #TODO: Add elbow configuration logic
+    pipe_config: Literal["straight", "90LR - Inner Elbow", "90LR - Outer Elbow"] = "straight"
     corrosion_rate: Optional[float] = None #mpy 
     default_retirement_limit: Optional[float] = None
     API_table : Literal["2025", "2009"] = "2025"
 
-    # Valid pipe types for reference
     VALID_PIPE_TYPES = ["straight", "bend-90", "bend-45", "tee", "elbow"]
-    
-    # Valid schedules for reference
     VALID_SCHEDULES = ["10", "40", "80", "120", "160"]
 
-    # Add the missing attributes that are referenced in methods
     trueOD_10 = trueOD_10
     trueOD_40 = trueOD_40
     trueOD_80 = trueOD_80
@@ -50,37 +43,36 @@ class PIPE:
     API574_SS_400F = API574_SS_400F
     API574_2009_TABLE_6 = API574_2009_TABLE_6
 
-    ##########################################
-    # PARSE TABLES
-    ##########################################
-    
     def _convert_nps_to_float(self, nps_str: str) -> float:
         """Convert NPS string to float, handling fractions like '3/4'"""
         try:
-            # First try direct conversion
             return float(nps_str)
         except ValueError:
-            # If that fails, try to evaluate as a fraction
             try:
-                # Handle fractions like '3/4', '1-1/2', etc.
                 if '-' in nps_str:
-                    # Handle mixed numbers like '1-1/2'
                     parts = nps_str.split('-')
                     if len(parts) == 2:
                         whole = float(parts[0])
-                        fraction = eval(parts[1])  # Safe here as we control the input
+                        fraction = eval(parts[1])
                         return whole + fraction
                     else:
                         raise ValueError(f"Invalid NPS format: {nps_str}")
                 else:
-                    # Handle simple fractions like '3/4'
-                    return eval(nps_str)  # Safe here as we control the input
+                    return eval(nps_str)
             except:
                 raise ValueError(f"Could not convert NPS '{nps_str}' to float")
 
+    def _convert_nps_to_table_key(self, nps_str: str) -> str:
+        """Convert NPS to table key format - strips .0 from whole numbers"""
+        nps_float = self._convert_nps_to_float(nps_str)
+        nps_str_formatted = str(nps_float)
+        if nps_str_formatted.endswith('.0'):
+            nps_str_formatted = nps_str_formatted[:-2]
+        return nps_str_formatted
+
     def which_API_table(self) -> float:
         try:
-            nps_key = self._convert_nps_to_float(self.nps)
+            nps_key = self._convert_nps_to_table_key(self.nps)
         except Exception:
             print(f"Could not convert NPS '{self.nps}' to float for API574 lookup.")
             return None
@@ -149,14 +141,18 @@ class PIPE:
             return 900
         else:
             return self.design_temp 
-
         
+    def get_radii(self) -> float:
+        """Get centerline radius for the pipe's NPS from ANSI standard"""
+        nps_key = self._convert_nps_to_table_key(self.nps)
+        
+        radius = ANSI_radii.get(nps_key)
+        
+        if radius is None:
+            raise ValueError(f"No ANSI radius data available for NPS {self.nps}")
+        
+        return radius
 
-    #####################################################################################
-    # CALCULATIONS 
-    ####################################################################################
-
-    
     def calculate_tmin_pressure(self, joint_type='Seamless') -> float:
         """
         Calculate minimum wall thickness for pressure design
@@ -170,27 +166,42 @@ class PIPE:
         E = self.E_[joint_type]
         
        
-        temp_str = str(self.round_temp())  # Get WSRF based on temperature
-        W = self.WSRF.get(temp_str, 1.0)  # Default to 1.0 if temp not found, most process piping operate at temperatures below 950F
+        temp_str = str(self.round_temp())
+        W = self.WSRF.get(temp_str, 1.0)
         
         Y = self.get_Y_coefficient()
         if Y is None:
             raise ValueError(f"No Y coefficient available for NPS {self.nps}")
         
-        # ASME B31.1 Eq. 3a: t = (P*D)/(2*(S*E*W + P*Y))
-        tmin_pressure = (self.pressure * D) / (2 * (S * E * W + self.pressure * Y))
+        if self.pipe_config == 'straight':
+            tmin_pressure = (self.pressure * D) / (2 * (S * E * W + self.pressure * Y))
+            return tmin_pressure
         
-        return tmin_pressure
-    
+        elif self.pipe_config == '90LR - Inner Elbow':
+            R_ = self.get_radii()
+            def intrados(R, D):
+                return (4*(R/D) - 1) / (4*(R/D) - 2)
+            def extrados(R, D): 
+                return (4*(R/D) + 1) / (4*(R/D) +2)
+
+            
+            if self.pipe_config == '90LR - Outer Elbow':
+                
+                return (self.pressure * D) / (2 * ((S*E*W)/(intrados(R_, D)) + self.pressure * Y))
+        
+            elif self.pipe_config == '90LR - Outer Elbow':
+                    
+                return (self.pressure * D) / (2 * ((S*E*W)/(extrados(R_, D)) + self.pressure * Y))
+                    
     def tmin_structural(self) -> float:
         """API 574 Table D.2"""
-        if self.API_table == "2025": # API 574 2025 Standard
-            nps_key = self._convert_nps_to_float(self.nps)
-            min_structural = self.API574_CS_400F[nps_key][self.pressure_class] #Only have 500F CS 
+        if self.API_table == "2025":
+            nps_key = self._convert_nps_to_table_key(self.nps)
+            min_structural = self.API574_CS_400F[nps_key][self.pressure_class]
             return min_structural
         
-        else: # API 574 2009 Standard
-            nps_key = self._convert_nps_to_float(self.nps)
+        else:
+            nps_key = self._convert_nps_to_table_key(self.nps)
             min_structural = self.API574_2009_TABLE_6[nps_key]["default_minimum_structural_thickness"]
             return min_structural
     
@@ -263,30 +274,27 @@ class PIPE:
 
     def analysis(self, measured_thickness: float, year_inspected: Optional[int] = None, joint_type='Seamless'):
         """
-        Analyze and compare all relevant thicknesses: pressure, structural, Table 5, and proposed retirement.
+        Analyze pipe thickness against pressure and structural requirements
         
         Args:
-            measured_thickness: The thickness measured during inspection (inches)
-            year_inspected: The year when the thickness was measured (e.g., 2020)
+            measured_thickness: Thickness measured during inspection (inches)
+            year_inspected: Year when thickness was measured (e.g., 2020)
             joint_type: Joint type for calculations
             
         Returns:
-            Dict with all relevant results and limiting factor.
+            Dict with analysis results and governing factor
         """
         
         # Calculate present-day actual thickness based on inspection year and corrosion rate
         if year_inspected is not None and self.corrosion_rate is not None:
-            current_year = 2025  # You could make this dynamic with datetime.now().year
+            current_year = 2025
             years_elapsed = current_year - year_inspected
             
             if years_elapsed < 0:
                 raise ValueError(f"Inspection year {year_inspected} cannot be in the future")
             
-            # Calculate corrosion loss since inspection
-            # 1 mpy = 0.001 inches per year
             corrosion_loss_inches = (self.corrosion_rate * 0.001) * years_elapsed
             
-            # Calculate present-day actual thickness
             actual_thickness = measured_thickness - corrosion_loss_inches
             
             print(f"Time-based corrosion calculation:")
@@ -297,7 +305,6 @@ class PIPE:
             print(f"  Present-day thickness: {actual_thickness:.4f} inches")
             
         else:
-            # Use measured thickness as-is if no inspection year or corrosion rate provided
             actual_thickness = measured_thickness
             print(f"Using measured thickness as present-day thickness: {actual_thickness:.4f} inches")
         
@@ -305,7 +312,6 @@ class PIPE:
         tmin_structural = self.tmin_structural()
 
         
-        # Use the provided default_retirement_limit if available
         default_retirement_limit = self.default_retirement_limit
         
         limits = {
@@ -313,8 +319,6 @@ class PIPE:
             "structural": tmin_structural,
         }
 
-        # Determines force contribution dictates the mechanical integrity and longevity of the pipe
-        # The limiting thickness is the LARGER of pressure or structural tmin (i.e., the most conservative, requiring replacement at the highest threshold)
         if limits["pressure"] >= limits["structural"]:
             governing_thickness = limits["pressure"]
             governing_type = "pressure"
@@ -326,7 +330,7 @@ class PIPE:
         print("-----------GOVERNING THICKNESS REQUIREMENT ----------")
         print(f"The pipe is {governing_type} thickness governed, pipe retirement is required at {governing_thickness} inches ({self.mil_conv(governing_thickness)} Mils)")
         print("-----------------------------------------------------")
-        # How much below the defaulted Retirement Limit
+        
         if default_retirement_limit is not None:
             if default_retirement_limit - actual_thickness >= 0:
                 below_defaultRL = default_retirement_limit - actual_thickness
@@ -338,7 +342,7 @@ class PIPE:
         
         if governing_type == "structural":
             
-            api574_value = self.which_API_table() #How much above the API574 Retirement Limit Code
+            api574_value = self.which_API_table()
             if api574_value is not None:
                 if api574_value < actual_thickness:
                     corosion_allowance = actual_thickness - api574_value
@@ -349,20 +353,19 @@ class PIPE:
             else:
                 corosion_allowance = None
 
-        else: #  governing_type == "pressure"       Pressure Governed Requires Immediate Pipe Retirement
-
+        else:
             if governing_thickness >= actual_thickness:
-                print(f"Actual Thickness is {governing_thickness - actual_thickness} inches ({self.mil_conv(governing_thickness - actual_thickness)} Mils), Retire Pipe Immediately, miniumum pressure containing thickness is not satisfied") 
+                print(f"Actual Thickness is {governing_thickness - actual_thickness} inches ({self.mil_conv(governing_thickness - actual_thickness)} Mils), Retire Pipe Immediately, miniumum pressure containing thickness is not satisfied")
         
         return {
             "measured_thickness": measured_thickness,
             "year_inspected": year_inspected,
-            "actual_thickness": actual_thickness,  # Present-day thickness
+            "actual_thickness": actual_thickness,
             "tmin_pressure": tmin_pressure,
             "tmin_structural": tmin_structural,
             "default_retirement_limit": default_retirement_limit,
             "below_defaultRL": below_defaultRL,
-            "api574_RL": self.which_API_table(), #Same as new, proposed retirement limit.
+            "api574_RL": self.which_API_table(),
             "above_api574RL": corosion_allowance,
             "life_span": self.life_span(corosion_allowance, self.corrosion_rate) if corosion_allowance is not None and self.corrosion_rate is not None else None,
             "governing_thickness": governing_thickness,
@@ -371,11 +374,11 @@ class PIPE:
 
     def generate_full_report(self, measured_thickness: float, year_inspected: Optional[int] = None, joint_type='Seamless') -> Dict[str, str]:
         """
-        Generate a complete analysis with text report and visualizations
+        Generate analysis with text report and visualizations
         
         Args:
-            measured_thickness: The thickness measured during inspection (inches)
-            year_inspected: The year when the thickness was measured (e.g., 2020)
+            measured_thickness: Thickness measured during inspection (inches)
+            year_inspected: Year when thickness was measured (e.g., 2020)
             joint_type: Joint type for calculations
             
         Returns:
@@ -407,14 +410,3 @@ class PIPE:
             "comparison_chart": comparison_chart_path,
             "analysis_results": analysis_results
         }
-
-
-# TODO
-
-#   - Make Visualizer more readable and add visual tool and report explainations in README
-#   - Add cli.py and __init__
-#   - Add Setup.py, requirements.txt, makefile, ect.
-#   - Fix allowable stress calculator
-#   - Explain how to import properietary JSON files of piping maintenance defaults
-#   - Add other metallurgy and temps to structural tmin py dictionaries
-#   - Add other metallurgy yield strengths to py dictionaries under S_
