@@ -1,7 +1,9 @@
 # TMIN
+[![PyPI downloads](https://img.shields.io/pypi/dm/tmin.svg)](https://pypi.org/project/tmin/)
+                    ![License](https://img.shields.io/pypi/l/tmin)    
 
 [![PyPI version](https://badge.fury.io/py/tmin.svg)](https://badge.fury.io/py/tmin)
-[![PyPI downloads](https://img.shields.io/pypi/dm/tmin.svg)](https://pypi.org/project/tmin/)
+![Python](https://img.shields.io/pypi/pyversions/tmin)
 
 The Industry-proven tool for determining retirement limits of process piping.
 
