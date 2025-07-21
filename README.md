@@ -6,7 +6,7 @@
 ![Python](https://img.shields.io/pypi/pyversions/tmin)
 
 The Industry-proven tool for determining retirement limits of process piping.
-
+---
 This project is published on PyPI and is installable via pip:
 
 ```bash 
