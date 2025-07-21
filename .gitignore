@@ -4,3 +4,9 @@ __pycache__/
 .venv/
 # Ignoring Propreitary Retirement Table
 table5.JSON
+
+# Ignore build artifacts and auto-generated files
+dist/
+build/
+*.egg-info/
+Reports/
