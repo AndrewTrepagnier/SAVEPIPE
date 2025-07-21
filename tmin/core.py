@@ -1,7 +1,6 @@
 from .asmetables.od_table import trueOD_40, trueOD_80, trueOD_10, trueOD_120, trueOD_160
 from .asmetables.wsrf import WSRF
 from .asmetables.y_coeff import ferritic_steels_y, austenitic_steels_y, other_metals_y, nickel_alloy_N06690_y, nickel_alloys_N06617_N08800_N08810_N08825_y, cast_iron_y
-from .asmetables.yield_stress import S_, E_
 from .asmetables.api_574_2025 import API574_CS_400F, API574_SS_400F
 from .asmetables.api_574_2009 import API574_2009_TABLE_6
 from .asmetables.ANSI_radii import ANSI_radii
@@ -20,7 +19,8 @@ class PIPE:
     nps: str  # Nominal pipe size (e.g., '2', '3/4', '1-1/2')
     pressure: float  # Design pressure (psi)
     pressure_class: Literal[150, 300, 600, 900, 1500, 2500]
-    metallurgy: Literal["CS A106 GR B", "SS 316/316S", "SS 304", "Inconel 625"] 
+    metallurgy: Literal["Intermediate/Low CS", "SS 316/316L", "SS 304/304L", "Inconel 625", "Other"]
+    allowable_stress: float # User defined Allowable Stress
     design_temp: Literal["<900" ,900, 950, 1000, 1050, 1100, 1150, 1200, 1250, "1250+" ] = 900 
     pipe_config: Literal["straight", "90LR - Inner Elbow", "90LR - Outer Elbow"] = "straight"
     corrosion_rate: Optional[float] = None #mpy 
@@ -37,8 +37,11 @@ class PIPE:
     trueOD_160 = trueOD_160
     WSRF = WSRF
     ferritic_steels_y = ferritic_steels_y
-    S_allow = S_
-    E_ = E_
+    austenitic_steels_y = austenitic_steels_y
+    other_metals_y = other_metals_y
+    nickel_alloy_N06690_y = nickel_alloy_N06690_y
+    nickel_alloys_N06617_N08800_N08810_N08825_y = nickel_alloys_N06617_N08800_N08810_N08825_y
+    cast_iron_y = cast_iron_y
     API574_CS_400F = API574_CS_400F
     API574_SS_400F = API574_SS_400F
     API574_2009_TABLE_6 = API574_2009_TABLE_6
@@ -70,29 +73,6 @@ class PIPE:
             nps_str_formatted = nps_str_formatted[:-2]
         return nps_str_formatted
 
-    def which_API_table(self) -> float:
-        try:
-            nps_key = self._convert_nps_to_table_key(self.nps)
-        except Exception:
-            print(f"Could not convert NPS '{self.nps}' to float for API574 lookup.")
-            return None
-        
-        if self.metallurgy == "CS A106 GR B":
-            api574_specified_tmin = API574_CS_400F.get(nps_key, {}).get(self.pressure_class)
-            if api574_specified_tmin is None:
-                print(f"No API574 value for NPS {nps_key} and class {self.pressure_class}")
-            return api574_specified_tmin
-        
-        elif self.metallurgy == "SS 316/316S":
-            api574_specified_tmin = API574_SS_400F
-            if api574_specified_tmin is None:
-                print(f"No API574 value for NPS {nps_key} and class {self.pressure_class}")
-            return api574_specified_tmin
-        
-        else:
-            print("No API574 Table Available for this Metallurgy")
-            return None
-    
     def allowable(self, Syield) -> float:
         return Syield*(2/3)
 
@@ -134,6 +114,16 @@ class PIPE:
             return self.ferritic_steels_y[self.round_temp()]
         elif self.metallurgy =='SS 316/316S':
             return self.austenitic_steels_y[self.round_temp()]
+        elif self.metallurgy =='Other':
+            return self.other_metals_y[self.round_temp()]
+        elif self.metallurgy =='Nickel Alloy':
+            return self.nickel_alloy_N06690_y[self.round_temp()]
+        elif self.metallurgy =='Nickel Alloys':
+            return self.nickel_alloys_N06617_N08800_N08810_N08825_y[self.round_temp()]
+        elif self.metallurgy =='Cast Iron':
+            return self.cast_iron_y[self.round_temp()]
+        else:
+            return 0.4 # Default Y value for unknown metallurgy
         
     def round_temp(self) -> int:
         """Used in temperature dependent look-up tables"""
@@ -162,10 +152,9 @@ class PIPE:
         if D is None:
             raise ValueError(f"Invalid NPS {self.nps} for schedule {self.schedule}")
         
-        S = self.S_allow['A-106 GR B']
-        E = self.E_[joint_type]
+        S = self.allowable_stress  # User-defined allowable stress
+        E = 1.0  # Joint efficiency factor (1.0 for seamless pipe)
         
-       
         temp_str = str(self.round_temp())
         W = self.WSRF.get(temp_str, 1.0)
         
@@ -184,15 +173,12 @@ class PIPE:
             def extrados(R, D): 
                 return (4*(R/D) + 1) / (4*(R/D) +2)
 
-            
             if self.pipe_config == '90LR - Outer Elbow':
-                
                 return (self.pressure * D) / (2 * ((S*E*W)/(intrados(R_, D)) + self.pressure * Y))
         
             elif self.pipe_config == '90LR - Outer Elbow':
-                    
                 return (self.pressure * D) / (2 * ((S*E*W)/(extrados(R_, D)) + self.pressure * Y))
-                    
+        
     def tmin_structural(self) -> float:
         """API 574 Table D.2"""
         if self.API_table == "2025":
@@ -342,15 +328,12 @@ class PIPE:
         
         if governing_type == "structural":
             
-            api574_value = self.which_API_table()
-            if api574_value is not None:
-                if api574_value < actual_thickness:
-                    corosion_allowance = actual_thickness - api574_value
-                    print(f"There is {corosion_allowance} inches ({self.mil_conv(corosion_allowance)} Mils) of corrosion allowance remaining")
-                else:
-                    print(f"Actual Thickness is {api574_value - actual_thickness} inches below corresponding API 574 Structural Retirement Limit for {self.metallurgy}, Retirement Recommended, Fit For Service assessment is needed")
-                    corosion_allowance = None
+            api574_value = self.tmin_structural()
+            if api574_value < actual_thickness:
+                corosion_allowance = actual_thickness - api574_value
+                print(f"There is {corosion_allowance} inches ({self.mil_conv(corosion_allowance)} Mils) of corrosion allowance remaining")
             else:
+                print(f"Actual Thickness is {api574_value - actual_thickness} inches below corresponding API 574 Structural Retirement Limit for {self.metallurgy}, Retirement Recommended, Fit For Service assessment is needed")
                 corosion_allowance = None
 
         else:
@@ -365,7 +348,7 @@ class PIPE:
             "tmin_structural": tmin_structural,
             "default_retirement_limit": default_retirement_limit,
             "below_defaultRL": below_defaultRL,
-            "api574_RL": self.which_API_table(),
+            "api574_RL": self.tmin_structural(),
             "above_api574RL": corosion_allowance,
             "life_span": self.life_span(corosion_allowance, self.corrosion_rate) if corosion_allowance is not None and self.corrosion_rate is not None else None,
             "governing_thickness": governing_thickness,

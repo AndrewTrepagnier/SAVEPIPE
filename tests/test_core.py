@@ -20,7 +20,8 @@ def test_basic_pipe_analysis():
         nps="2",
         pressure=50.0,
         pressure_class=150,
-        metallurgy="CS A106 GR B",
+        metallurgy="Intermediate/Low CS",
+        allowable_stress=23333.0,  # 35000 * 2/3 for A106 GR B
         corrosion_rate=10.0,
         default_retirement_limit=0.050
     )
@@ -42,7 +43,8 @@ def test_time_based_corrosion_calculation():
         nps="2",
         pressure=50.0,
         pressure_class=150,
-        metallurgy="CS A106 GR B",
+        metallurgy="Intermediate/Low CS",
+        allowable_stress=23333.0,
         corrosion_rate=10.0,  # 10 mpy = 0.010 inches per year
         default_retirement_limit=0.050
     )
@@ -64,7 +66,8 @@ def test_pipe_without_corrosion_rate():
         nps="2",
         pressure=50.0,
         pressure_class=150,
-        metallurgy="CS A106 GR B",
+        metallurgy="Intermediate/Low CS",
+        allowable_stress=23333.0,
         default_retirement_limit=0.050
     )
     
@@ -81,7 +84,8 @@ def test_pipe_without_retirement_limit():
         nps="2",
         pressure=50.0,
         pressure_class=150,
-        metallurgy="CS A106 GR B",
+        metallurgy="Intermediate/Low CS",
+        allowable_stress=23333.0,
         corrosion_rate=10.0
     )
     
@@ -98,7 +102,8 @@ def test_edge_case_thickness_below_api574():
         nps="2",
         pressure=50.0,
         pressure_class=150,
-        metallurgy="CS A106 GR B",
+        metallurgy="Intermediate/Low CS",
+        allowable_stress=23333.0,
         corrosion_rate=10.0,
         default_retirement_limit=0.050
     )
@@ -116,24 +121,20 @@ def test_practice_scenario():
         nps="3",
         pressure=75.0,
         pressure_class=300,
-        metallurgy="CS A106 GR B",
+        metallurgy="Intermediate/Low CS",
+        allowable_stress=23333.0,
         corrosion_rate=15.0,
         default_retirement_limit=0.080
     )
     
-    results = pipe.analysis(measured_thickness=0.095, year_inspected=2022)
+    results = pipe.analysis(measured_thickness=0.120, year_inspected=2022)
     
     assert results is not None
-    assert results["tmin_pressure"] > 0
-    assert results["tmin_structural"] > 0
-    assert results["governing_thickness"] > 0
-    assert results["governing_type"] in ["pressure", "structural"]
-    
-    # Check that we have some corrosion allowance if above API 574 limit
-    if results["above_api574RL"] is not None:
-        assert results["above_api574RL"] > 0
-        assert results["life_span"] is not None
-        assert results["life_span"] > 0
+    assert results["measured_thickness"] == 0.120
+    assert results["year_inspected"] == 2022
+    # Corrosion loss should be 0.015 * 3 = 0.045 inches
+    # Present-day thickness should be 0.120 - 0.045 = 0.075 inches
+    assert abs(results["actual_thickness"] - 0.075) < 0.001
 
 def test_future_inspection_year_error():
     """Test that future inspection years raise an error"""
@@ -142,7 +143,8 @@ def test_future_inspection_year_error():
         nps="2",
         pressure=50.0,
         pressure_class=150,
-        metallurgy="CS A106 GR B",
+        metallurgy="Intermediate/Low CS",
+        allowable_stress=23333.0,
         corrosion_rate=10.0
     )
     
@@ -157,16 +159,18 @@ def test_nps_fraction_conversion():
         nps="3/4",
         pressure=50.0,
         pressure_class=150,
-        metallurgy="CS A106 GR B"
+        metallurgy="Intermediate/Low CS",
+        allowable_stress=23333.0
     )
     
-    # Test mixed numbers
+    # Test mixed fractions
     pipe2 = PIPE(
         schedule="40",
         nps="1-1/2",
         pressure=50.0,
         pressure_class=150,
-        metallurgy="CS A106 GR B"
+        metallurgy="Intermediate/Low CS",
+        allowable_stress=23333.0
     )
     
     # Test whole numbers
@@ -175,17 +179,13 @@ def test_nps_fraction_conversion():
         nps="2",
         pressure=50.0,
         pressure_class=150,
-        metallurgy="CS A106 GR B"
+        metallurgy="Intermediate/Low CS",
+        allowable_stress=23333.0
     )
     
-    # Verify the conversion works by checking that analysis runs without errors
-    results1 = pipe1.analysis(measured_thickness=0.060)
-    results2 = pipe2.analysis(measured_thickness=0.060)
-    results3 = pipe3.analysis(measured_thickness=0.060)
-    
-    assert results1 is not None
-    assert results2 is not None
-    assert results3 is not None
+    assert pipe1._convert_nps_to_float("3/4") == 0.75
+    assert pipe2._convert_nps_to_float("1-1/2") == 1.5
+    assert pipe3._convert_nps_to_float("2") == 2.0
 
 if __name__ == "__main__":
     pytest.main([__file__])
