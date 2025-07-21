@@ -7,6 +7,12 @@
 
 The Industry-proven tool for determining retirement limits of process piping.
 
+This project is published on PyPI and is installable via pip:
+
+```bash 
+pip install tmin
+```
+
 ## Introduction
 
 Many oil and gas companies are faced with maintaining 10,000+ miles of 100+ year old piping networks supporting multi-billion dollar/year processing operations. There is rarely a simple solution to immediately shutdown a process pipe - as these shutdowns more often than not impact other units and cost companies millions in time and resources.
