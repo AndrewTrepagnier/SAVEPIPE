@@ -8,7 +8,6 @@ from .asmetables.ANSI_radii import ANSI_radii
 import numpy as np
 from dataclasses import dataclass
 from typing import Literal, Optional, Dict
-import json
 import matplotlib.pyplot as plt
 from datetime import datetime
 
@@ -143,20 +142,30 @@ class PIPE:
         
         return radius
 
-    def calculate_tmin_pressure(self, joint_type='Seamless') -> float:
+    def tmin_pressure(self, joint_type='Seamless') -> float:
         """
         Calculate minimum wall thickness for pressure design
         Based on ASME B31.1 Para. 304.1.2a Eq. 3a
+        
+        For seamless pipe (most common): E = 1.0, W = 1.0
+        For welded pipe: E and W depend on temperature and weld type
         """
         D = self.get_OD()
         if D is None:
             raise ValueError(f"Invalid NPS {self.nps} for schedule {self.schedule}")
         
         S = self.allowable_stress  # User-defined allowable stress
-        E = 1.0  # Joint efficiency factor (1.0 for seamless pipe)
         
-        temp_str = str(self.round_temp())
-        W = self.WSRF.get(temp_str, 1.0)
+        # Joint efficiency and weld strength reduction factors
+        if joint_type == 'Seamless':
+            E = 1.0  # Joint efficiency factor for seamless pipe
+            W = 1.0  # Weld strength reduction factor for seamless pipe
+        else:
+            # For welded pipe, E and W depend on temperature and weld type
+            # This would need to be implemented based on ASME B31.1 tables
+            raise ValueError(f"Welded pipe analysis (joint_type='{joint_type}') is not yet supported. "
+                           f"Currently only seamless pipe analysis is available. "
+                           f"Support for seam pipe is under development.")
         
         Y = self.get_Y_coefficient()
         if Y is None:
@@ -294,7 +303,7 @@ class PIPE:
             actual_thickness = measured_thickness
             print(f"Using measured thickness as present-day thickness: {actual_thickness:.4f} inches")
         
-        tmin_pressure = self.calculate_tmin_pressure(joint_type)
+        tmin_pressure = self.tmin_pressure(joint_type)
         tmin_structural = self.tmin_structural()
 
         

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "tmin"
-version = "0.2.0"
+version = "0.3.0"
 description = "A comprehensive pipe thickness analysis tool for mechanical integrity engineering"
 readme = "README.md"
 license = {text = "MIT"}
@@ -28,6 +28,9 @@ requires-python = ">=3.8"
 dependencies = [
     "numpy>=1.23",
     "matplotlib>=3.5",
+    "toml>=0.10.0",
+    "jupyter>=1.0.0",
+    "notebook>=6.0.0",
 ]
 
 [project.optional-dependencies]
