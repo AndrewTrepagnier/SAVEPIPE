@@ -4,11 +4,11 @@
 [![PyPI version](https://badge.fury.io/py/tmin.svg)](https://badge.fury.io/py/tmin)
 ![Python](https://img.shields.io/pypi/pyversions/tmin)
 
-**The 5-minute pipe thickness analysis tool that tells you if your pipe is safe to operate.**
+**The 5-minute pipe thickness analysis tool that tells you if your process pipe is safe to operate.**
 
-All process pipes corrode over time, this package helps determine whether the pipe has structural/pressure integrity and is ASME/API compliant - with one python function.
+All process pipes corrode over time, this package helps determine whether the pipe has structural/pressure integrity and is ASME/API-compliant, all with one python function.
+
 ---
-
 ## You have an inspection report. Now what?
 
 **Scenario:** UT readings show your 2" Schedule 40 pipe has 0.060" wall thickness. You need to know if it's safe to operate and how much time remains before pipe retirement.
@@ -17,7 +17,8 @@ All process pipes corrode over time, this package helps determine whether the pi
 
 **The TMIN way:** One Python script, instant answers.
 
-[GIF: TMIN analysis demo - from input to results in 30 seconds]
+![pipe_thinning](https://github.com/user-attachments/assets/abba85a5-096e-4824-98ee-4d90ff32e206)
+
 
 ---
 
@@ -68,7 +69,7 @@ print("Generated:", list(report_files.keys()))
 
 ---
 
-## Real Engineering Problems Solved
+## Engineering Problems Solved
 
 **"Is this pipe safe?"**
 ```python
@@ -100,7 +101,7 @@ print(f"Corrosion allowance: {results['above_api574RL']:.4f}\" inches")
 
 ---
 
-## Why Engineers Choose TMIN
+## Why TMIN
 
 **Speed**
 30 seconds from inspection data to compliance report. No manual calculations or code book lookups. Instant visual analysis.
