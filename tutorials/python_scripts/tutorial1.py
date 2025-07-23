@@ -28,7 +28,8 @@ pipe = tmin.PIPE(
 results = pipe.analysis(measured_thickness, year_inspected)
 
 # Step 5: Generate reports and visuals
-report_files = pipe.generate_full_report(measured_thickness, year_inspected)
+# Generate full report with visualizations
+report_files = pipe.report(measured_thickness, year_inspected)
 
 
 print("\nDone! Check the Reports folder for your files.") 

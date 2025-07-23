@@ -225,7 +225,7 @@ Examples:
 
         # Generate full report
         print(f"\nGenerating analysis and reports in: {output_dir}")
-        report_files = pipe.generate_full_report(
+        report_files = pipe.report(
             measured_thickness=args.measured_thickness,
             year_inspected=args.year_inspected
         )

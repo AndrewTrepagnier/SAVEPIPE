@@ -364,7 +364,7 @@ class PIPE:
             "governing_type": governing_type,
         }
 
-    def generate_full_report(self, measured_thickness: float, year_inspected: Optional[int] = None, joint_type='Seamless') -> Dict[str, str]:
+    def report(self, measured_thickness: float, year_inspected: Optional[int] = None, joint_type='Seamless') -> Dict[str, str]:
         """
         Generate analysis with text report and visualizations
         

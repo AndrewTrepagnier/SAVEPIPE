@@ -1,231 +1,203 @@
 # TMIN
 [![PyPI downloads](https://img.shields.io/pypi/dm/tmin.svg)](https://pypi.org/project/tmin/)
-                    ![License](https://img.shields.io/pypi/l/tmin)    
-
+![License](https://img.shields.io/pypi/l/tmin)    
 [![PyPI version](https://badge.fury.io/py/tmin.svg)](https://badge.fury.io/py/tmin)
 ![Python](https://img.shields.io/pypi/pyversions/tmin)
 
-The Industry-proven tool for determining retirement limits of process piping.
+**The 5-minute pipe thickness analysis tool that tells you if your pipe is safe to operate.**
+
+All process pipes corrode over time, this package helps determine whether the pipe has structural/pressure integrity and is ASME/API compliant - with one python function.
 ---
-This project is published on PyPI and is installable via pip:
 
-```bash 
-pip install tmin
-```
+## You have an inspection report. Now what?
 
-## Introduction
+**Scenario:** UT readings show your 2" Schedule 40 pipe has 0.060" wall thickness. You need to know if it's safe to operate and how much time remains before pipe retirement.
 
-Many oil and gas companies are faced with maintaining 10,000+ miles of 100+ year old piping networks supporting multi-billion dollar/year processing operations. There is rarely a simple solution to immediately shutdown a process pipe - as these shutdowns more often than not impact other units and cost companies millions in time and resources.
+**The Previous Way:** Hours of manual calculations, code book lookups, and hoping you didn't miss anything.
 
-In mechanical integrity engineering, we are frequently asked the hard question - **do we have to shutdown the pipe immediately, or do we have time?** Pipe retirement requires rigorous analysis. You must find the perfect balance - such that one isn't squandering company time/resources but also holding personnel safety paramount.
+**The TMIN way:** One Python script, instant answers.
 
-**This is more than a python package, it is a comprehensive engineering decision support system for critical infrastructure safety and operational continuity.**
+[GIF: TMIN analysis demo - from input to results in 30 seconds]
 
-## The Challenge
+---
 
-**Cross-section of Pipe Wall Thinning Over Time**
+## Get Started in 60 Seconds
 
-![pipe_thinning](https://github.com/user-attachments/assets/02328bf4-90e7-47f2-aa1b-324c773508dd)
-
-Every day, mechanical integrity engineers face decisions that can cost millions of dollars or risk catastrophic failure. When a pipe shows signs of thinning, the clock starts ticking. You need answers fast:
-
-- **Can this pipe continue operating safely?**
-- **How much time do we have before retirement is mandatory?**
-- **What are the consequences of immediate shutdown vs. continued operation?**
-- **How do we balance operational continuity with personnel safety?**
-
-These aren't theoretical questions - they're real decisions that affect production, safety, and the bottom line. TMIN was built by engineers, for engineers, to provide the analytical rigor needed for these critical decisions.
-
-## Understanding Pipe Retirement Limits
-
-Imagine a pipe wall gradually thinning over a 10-year span, slowly approaching a critical red line - the **retirement limit**. This is the minimum acceptable wall thickness that ensures safe operation. When the actual thickness hits this line, the pipe must be retired or replaced immediately.
-
-### The Two Minimum Thickness Requirements
-
-Pipe design involves two distinct minimum thickness calculations. The **pressure design minimum** ensures the pipe can contain internal pressure safely using ASME B31.1 equations that consider design pressure, temperature effects, and material properties. The **structural minimum** ensures the pipe can support its own weight and external loads according to API 574 Table D.2 requirements, which becomes critical for per-code pipe spans. However, this package does not account for fluid weight, insulation, heat tracing equipment, pipe hangers, and other per-application basis.
-
-The **limiting thickness** is whichever of these two values is more restrictive. TMIN automatically determines which factor controls your design and provides clear guidance on current status, remaining life, and required actions.
-
-### Corrosion Allowance and Remaining Life
-
-The difference between your actual thickness and the retirement limit is your **corrosion allowance** - essentially your safety margin. This allowance, combined with your known corrosion rate from inspection reports, determines how much time you have before retirement becomes mandatory.
-
-This analytical approach transforms the complex retirement decision into a clear, data-driven process that balances operational needs with safety requirements.
-
-## Overview
-
-TMIN is a sophisticated pipe thickness analysis tool designed for mechanical integrity engineers, reliability specialists, and operations teams in the oil and gas industry. It provides automated analysis of pipe wall thickness against multiple design criteria and generates professional reports with actionable recommendations.
-
-### Example Output of Reports and Visuals
-
-A folder called "Reports" will be automatically generated in the user's root directory and populated with .txt reports and helpful visualizations of the TMIN analysis. The report will show both the measured thickness, the inspection year, and the calculated present-day thickness. 
-
-All files are automatically named with timestamps:
-```
-Reports/
-├── 20250712_181928_TMIN_report_TMIN_20250712_181928.txt
-├── 20250712_181928_TMIN_summary_20250712_181928.txt
-├── 20250712_181928_thickness_analysis_number_line.png
-└── 20250712_181928_thickness_comparison_chart.png
-```
-
-<img width="3477" height="1649" alt="20250714_191322_thickness_analysis_number_line" src="https://github.com/user-attachments/assets/4bfb98dc-ce59-4c43-b68d-8b56e404e05e" />
-
-
-The comparison chart displays a bar chart comparing all relevant thickness values (measured, pressure design minimum, structural minimum, and retirement limits) to quickly identify which factor controls the pipe design.
-
-
-<img width="2968" height="1769" alt="20250714_191322_thickness_comparison_chart" src="https://github.com/user-attachments/assets/815ab487-7f7d-4448-ab64-525366debbd2" />
-
-
-## Install
-
-It is recommended to use a virtual environment:
-
-```bash
-python -m venv venv
-source venv/bin/activate  # On Windows use: venv\Scripts\activate
-```
-
-Then install TMIN with pip:
-
+### 1. Install
 ```bash
 pip install tmin
 ```
 
----
-
-## How It Works: Time-Based Corrosion Adjustment
-
-TMIN allows you to supply both the measured thickness and the year that measurement was taken. If you also provide a corrosion rate (in mpy), TMIN will automatically calculate the present-day (current) thickness by accounting for the metal loss since the last inspection.
-
-**Calculation:**
-
-```
-present_day_thickness = measured_thickness - (corrosion_rate × years_elapsed × 0.001)
-```
-- `measured_thickness`: The thickness measured during the last inspection (inches)
-- `corrosion_rate`: Corrosion rate in mils per year (mpy)
-- `years_elapsed`: Years since the inspection (current year - inspection year)
-- `0.001`: Conversion factor from mpy to inches per year
-
-If you do not supply an inspection year or corrosion rate, TMIN will use the measured thickness as the present-day thickness.
-
-## Example
-
-### Run as a CLI Tool
-
-```bash
-tmin
-```
-Follow the prompts to analyze your pipe and generate reports. You will be asked for:
-- Measured thickness during inspection (inches)
-- Year when thickness was measured (e.g., 2022)
-- Corrosion rate (mpy, optional)
-
-TMIN will calculate the present-day thickness and use it for all analysis and reporting.
-
-### Or Use as a Python API
-
+### 2. Run ASME/API-Compliant Analysis in 1 Minute
 ```python
-from tmin.core import PIPE
+import tmin
 
-# Create a pipe instance
-pipe = PIPE(
+# Create pipe instance
+pipe = tmin.PIPE(
     schedule="40",
     nps="2", 
     pressure=50.0,
     pressure_class=150,
-    metallurgy="CS A106 GR B",
-    corrosion_rate=10.0  # mpy (optional)
+    metallurgy="Intermediate/Low CS",
+    allowable_stress=23333.0
 )
 
-# Analyze with time-based corrosion adjustment
-results = pipe.analysis(measured_thickness=0.060, year_inspected=2023)
-print("Present-day thickness:", results["actual_thickness"])
-
-# Generate full report with visualizations
-report_files = pipe.generate_full_report(measured_thickness=0.060, year_inspected=2023)
+# Analyze thickness
+results = pipe.analysis(measured_thickness=0.060)
+print(f"Safe to operate: {results['actual_thickness'] > results['governing_thickness']}")
+print(f"Remaining life: {results['life_span']} years")
 ```
-## Industrial Standards Featured
 
-### Pressure Design (ASME B31.1)
-- Calculates minimum wall thickness for pressure containment
-- Considers temperature effects via WSRF (Weld Strength Reduction Factor)
-- Uses Y-coefficient for high-temperature applications
+**Result:** Professional report with compliance status, remaining life, and visual analysis in under 30 seconds.
 
-### Structural Requirements (API 574)
-- Evaluates minimum thickness for structural integrity
-- Considers pipe deflection and weight loading
-- Based on API 574 Table D.2 requirements
+### 3. Get Results
+```python
+print(f"✅ Pressure Design: {results['tmin_pressure']:.4f}\" minimum required")
+print(f"✅ Structural: {results['tmin_structural']:.4f}\" minimum required")
+print(f"✅ Current: {results['actual_thickness']:.4f}\" measured thickness")
+print(f"✅ Status: {'SAFE TO OPERATE' if results['actual_thickness'] > results['governing_thickness'] else 'RETIRE IMMEDIATELY'}")
+print(f"✅ Remaining Life: {results['life_span']} years at {pipe.corrosion_rate} mpy corrosion")
+```
 
-### Retirement Limits
-- **API 574 Retirement Limit**: Code-mandated minimum thickness
-- **Table 5 Retirement Limit**: Company-specific maintenance limits
-- **Custom Limits**: User-defined retirement criteria
+**Generate Full Report:**
+```python
+# Create professional reports and visualizations
+report_files = pipe.report(measured_thickness=0.060)
+print("Generated:", list(report_files.keys()))
+```
 
-### Corrosion Analysis
-- **Life Span Prediction**: Based on corrosion rate and thickness excess
-- **Corrosion Allowance**: Thickness above retirement limits
-- **Monitoring Recommendations**: Inspection frequency guidance
+---
 
+## Real Engineering Problems Solved
 
+**"Is this pipe safe?"**
+```python
+import tmin
+pipe = tmin.PIPE(schedule="40", nps="2", pressure=50.0, 
+                pressure_class=150, metallurgy="Intermediate/Low CS", 
+                allowable_stress=23333.0)
+results = pipe.analysis(measured_thickness=0.060)
+print(f"Safe to operate: {results['actual_thickness'] > results['governing_thickness']}")
+```
 
-## Supported Pipe Specifications
+**"How much time do we have?"**
+```python
+# TMIN automatically calculates remaining life based on corrosion rate
+print(f"Remaining life: {results['life_span']} years")
+```
 
-### Schedules
-- 10, 40, 80, 120, 160
+**"Are we code compliant?"**
+```python
+# TMIN checks against ASME B31.1 and API 574 automatically
+print(f"API 574 compliant: {results['actual_thickness'] > results['api574_RL']}")
+```
 
-### Nominal Pipe Sizes (NPS)
-- 0.5" to 24" (varies by schedule)
+**"What's our corrosion allowance?"**
+```python
+# TMIN calculates safety margin above retirement limits
+print(f"Corrosion allowance: {results['above_api574RL']:.4f}\" inches")
+```
 
-### Pressure Classes
-- 150, 300, 600, 900, 1500, 2500
+---
 
-### Metallurgies
-- CS A106 GR B (Carbon Steel)
-- SS 316/316S (Stainless Steel) - Coming Soon
-- SS 304 (Stainless Steel) - Coming Soon
-- Inconel 625 (Nickel Alloy) - Coming Soon
+## Why Engineers Choose TMIN
 
-## Testing
+**Speed**
+30 seconds from inspection data to compliance report. No manual calculations or code book lookups. Instant visual analysis.
 
-Run the comprehensive test suite:
+**Accuracy**
+Built on ASME B31.1 and API 574 standards. Automatic governing factor determination. Time-based corrosion adjustment.
+
+**Professional Output**
+Auto-generated reports with timestamps. Visual thickness analysis charts. Compliance documentation for audits.
+
+**Real-World Ready**
+Handles corrosion rates and inspection dates. Supports multiple metallurgies and pipe schedules. TOML configuration for batch analysis.
+
+---
+
+## What TMIN Analyzes
+
+**Pressure Design (ASME B31.1)**
+Minimum wall thickness for pressure containment. Temperature effects and material properties. Y-coefficient calculations.
+
+**Structural Requirements (API 574)**
+Minimum thickness for structural integrity. Pipe deflection and weight loading. Table D.2 compliance.
+
+**Corrosion Analysis**
+Time-based thickness adjustment. Remaining life prediction. Corrosion allowance calculations.
+
+**Compliance Reporting**
+Governing factor identification. Safety margin analysis. Professional documentation.
+
+---
+
+## Supported Specifications
+
+| Schedules | NPS Sizes | Pressure Classes | Metallurgies |
+|-----------|-----------|------------------|--------------|
+| 10, 40, 80, 120, 160 | 0.5" to 24" | 150, 300, 600, 900, 1500, 2500 | Carbon Steel, Stainless Steel, Nickel Alloys |
+
+---
+
+## Perfect For
+
+**Mechanical Integrity Engineers** - Quick compliance checks
+**Reliability Specialists** - Life extension analysis  
+**Operations Teams** - Emergency thickness evaluations
+**Inspection Contractors** - Professional reporting
+**Engineering Consultants** - Client deliverables
+
+---
+
+## Command Line Interface
+
+**Basic Analysis**
+```bash
+tmin -s 40 -n "2" -p 50 -c 150 -m "Intermediate/Low CS" -a 23333 -t 0.060
+```
+
+**With Corrosion Rate**
+```bash
+tmin -s 40 -n "2" -p 50 -c 150 -m "Intermediate/Low CS" -a 23333 -t 0.060 -r 10 -y 2023
+```
+
+**Using Configuration File**
+```bash
+# Create pipe_config.toml with your parameters
+tmin -f pipe_config.toml -t 0.060
+```
+
+**Custom Output Directory**
+```bash
+tmin -s 40 -n "2" -p 50 -c 150 -m "Intermediate/Low CS" -a 23333 -t 0.060 -o ./my_reports
+```
+
+---
+
+## Test It Yourself
 
 ```bash
+# Install and test
+pip install tmin
 python -m pytest tests/test_core.py -v
 ```
 
-The test suite includes:
-- Basic analysis functionality
-- Time-based corrosion adjustment
-- Report generation
-- Multiple pipe scenarios
-- Corrosion rate analysis
-- Edge case handling
+---
 
-## Contributing
+## Need Help?
 
-This project is designed for the mechanical integrity engineering community. Contributions are welcome, especially for:
+**Documentation:** Built-in help with `tmin --help`
+**Examples:** See `example_pipe_config.toml`
+**Contact:** andrew[dot]trepagnier[at]icloud[dot]com
 
-- Additional metallurgy support
-- New retirement limit standards
-- Enhanced visualization features
-- Additional analysis criteria
-
-## License
-
-MIT License
+---
 
 ## Disclaimer
 
-TMIN is a decision support tool designed to assist qualified engineers in making informed decisions about pipe integrity. It should be used in conjunction with professional engineering judgment and should not be the sole basis for critical safety decisions. Always consult with qualified personnel and follow applicable codes and standards.
+TMIN is a decision support tool for qualified engineers. Always use professional judgment and follow applicable codes and standards.
 
-## Contact
-
-For questions, suggestions, or contributions, please contact:
-andrew[dot]trepagnier[at]icloud[dot]com
----
+**License:** MIT
 
 
 
